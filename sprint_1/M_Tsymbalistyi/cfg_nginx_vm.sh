@@ -55,29 +55,25 @@ function main {
         folder_name="Hot-Peppers"
 
         setup_packages
-
+        if [[ -e $folder_name ]]; then
+                log "$folder_name already exists, it will be backuped"
+                mv -f $folder_name $folder_name~ &> /dev/null
+        fi
         sudo git clone -b $branch https://$pat_token@github.com/$repo_path $folder_name &> /dev/null
 
-        if [[ $? -eq 128 ]]; then
-                error_log "Folder $folder_name already exists"
-                exit 1
-        fi
-
         if [[ -e /etc/nginx/nginx.conf ]]; then
-                error_log "/etc/nginx/nginx.conf already exists"
-                exit 1
-        else
-                sudo cp $folder_name/nginx.conf /etc/nginx/nginx.conf
+                log "/etc/nginx/nginx.conf already exists, file will be backuped"
         fi
+        sudo cp -fb $folder_name/nginx.conf /etc/nginx/nginx.conf
+
         if [[ -e /var/www/html/index.html ]]; then
-                error_log "/var/www/html/index.html already exists"
-                exit 1
-        else
-                sudo cp $folder_name/index.html /var/www/html/index.html
+                log "/var/www/html/index.html already exists, file will be backuped"
         fi
+        sudo cp -fb $folder_name/index.html /var/www/html/index.html
 
         log "Reloading nginx"
         sudo nginx -s reload &> /dev/null
+        log "Setup completed"
 }
 
 main "$@"
