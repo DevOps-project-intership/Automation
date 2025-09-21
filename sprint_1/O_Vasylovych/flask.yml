@@ -1,64 +1,44 @@
 ---
-- name: Update db servers
-  hosts: databases
-  remote_user: root
+- name: Update web servers
+  hosts: localhost
+  remote_user: vagrant
   become: yes
   tasks:
-    - name: Ensure PostgreSQL and psycopg2 are installed
+    - name: Ensure that nginx is installed
       ansible.builtin.apt:
-        name:
-          - postgresql
-          - postgresql-contrib
-          - python3-psycopg2
+        name: nginx
         state: present
         update_cache: yes
 
-    - name: Ensure PostgreSQL is running and enabled
+    - name: Ensure Nginx is running and enabled
       ansible.builtin.systemd:
-        name: postgresql
+        name: nginx
         state: started
         enabled: true
 
-    - name: Create database
-      community.postgresql.postgresql_db:
-        name: "{{ db_name }}"
+    - name: Ensure Flask and Gunicorn are installed
+      ansible.builtin.apt:
+        name:
+          - python3-flask
+          - gunicorn
         state: present
-      become_user: postgres
+        update_cache: yes
 
-    - name: Create database user with password
-      community.postgresql.postgresql_user:
-        name: "{{ db_user }}"
-        password: "{{ db_password }}"
-        state: present
-      become_user: postgres
+    - name: Deploy Nginx reverse proxy config
+      ansible.builtin.template:
+        src: flask.conf.j2
+        dest: /etc/nginx/sites-enabled/flask.conf
+        mode: "0644"
+      notify: Reload nginx
 
-    - name: Grant ALL privileges on DB to user
-      community.postgresql.postgresql_privs:
-        database: "{{ db_name }}"
-        roles: "{{ db_user }}"
-        type: database
-        privs: ALL
-        state: present
-      become_user: postgres
-
-    - name: Allow remote connections in postgresql.conf
-      ansible.builtin.lineinfile:
-        path: /etc/postgresql/16/main/postgresql.conf
-        regexp: '^#?listen_addresses ='
-        line: "listen_addresses = '*'"
-        backup: yes
-      notify: Restart PostgreSQL
-
-    - name: Add pg_hba.conf rule for webservers
-      ansible.builtin.lineinfile:
-        path: /etc/postgresql/16/main/pg_hba.conf
-        insertafter: '^#.*IPv4 local connections:'
-        line: "host    {{ db_name }}    {{ db_user }}    {{ db_network }}    md5"
-        backup: yes
-      notify: Restart PostgreSQL
+    - name: Remove default site
+      ansible.builtin.file:
+        path: /etc/nginx/sites-enabled/default
+        state: absent
+      notify: Reload nginx
 
   handlers:
-    - name: Restart PostgreSQL
+    - name: Reload nginx
       ansible.builtin.systemd:
-        name: postgresql
-        state: restarted
+        name: nginx
+        state: reloaded
