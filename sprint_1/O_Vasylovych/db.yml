@@ -1,6 +1,6 @@
 ---
 - name: Update db servers
-  hosts: databases
+  hosts: localhost
   remote_user: root
   become: yes
 
@@ -46,16 +46,12 @@
       community.postgresql.postgresql_set:
         name: listen_addresses
         value: "{{ pg_listen_ip }}"
-        immediate: false
       become_user: postgres
       notify: Restart PostgreSQL
 
     - name: Add pg_hba rule
       community.postgresql.postgresql_pg_hba:
         dest: "/etc/postgresql/16/main/pg_hba.conf"
-        type: host
-        database: all
-        user: all
         address: "{{ pg_allowed_net }}"
         method: scram-sha-256
         state: present
