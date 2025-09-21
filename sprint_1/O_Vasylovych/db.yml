@@ -42,11 +42,11 @@
         state: present
       become_user: postgres
 
-    - name: Set listen_addresses
-      community.postgresql.postgresql_conf:
+    - name: Set listen_addresses in postgresql.conf
+      community.postgresql.postgresql_set:
         name: listen_addresses
         value: "{{ pg_listen_ip }}"
-        config_file: "/etc/postgresql/16/main/postgresql.conf"
+        immediate: false
       become_user: postgres
       notify: Restart PostgreSQL
 
