@@ -40,49 +40,6 @@
         privs: ALL
         state: present
       become_user: postgres
-
-    ---
-- name: Update db servers
-  hosts: databases
-  remote_user: root
-  become: yes
-  tasks:
-    - name: Ensure PostgreSQL and psycopg2 are installed
-      ansible.builtin.apt:
-        name:
-          - postgresql
-          - postgresql-contrib
-          - python3-psycopg2
-        state: present
-        update_cache: yes
-
-    - name: Ensure PostgreSQL is running and enabled
-      ansible.builtin.systemd:
-        name: postgresql
-        state: started
-        enabled: true
-
-    - name: Create database
-      community.postgresql.postgresql_db:
-        name: "{{ db_name }}"
-        state: present
-      become_user: postgres
-
-    - name: Create database user with password
-      community.postgresql.postgresql_user:
-        name: "{{ db_user }}"
-        password: "{{ db_password }}"
-        state: present
-      become_user: postgres
-
-    - name: Grant ALL privileges on DB to user
-      community.postgresql.postgresql_privs:
-        database: "{{ db_name }}"
-        roles: "{{ db_user }}"
-        type: database
-        privs: ALL
-        state: present
-      become_user: postgres
 - name: Set listen_addresses
   community.postgresql.postgresql_conf:
     name: listen_addresses
