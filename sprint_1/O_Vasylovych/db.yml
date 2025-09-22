@@ -43,7 +43,7 @@
             state: present
             login_user: postgres
 
-        - name: Set listen_addresses via ALTER SYSTEM
+        - name: Set listen_addresses
           community.postgresql.postgresql_alter_system:
             param: listen_addresses
             value: "{{ pg_listen_ip }}"
