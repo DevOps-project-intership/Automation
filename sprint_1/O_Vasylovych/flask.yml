@@ -1,6 +1,6 @@
 ---
 - name: Update web servers
-  hosts: localhost
+  hosts: server
   remote_user: vagrant
   become: yes
   tasks:
@@ -16,14 +16,16 @@
         state: started
         enabled: true
 
-    - name: Ensure Flask and Gunicorn are installed
+    - name: Ensure python3 and packages are installed
       ansible.builtin.apt:
         name:
+          - python3
+          - python3-pip
           - python3-flask
           - gunicorn
         state: present
         update_cache: yes
-
+   
     - name: Deploy Nginx reverse proxy config
       ansible.builtin.template:
         src: flask.conf.j2
