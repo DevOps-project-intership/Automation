@@ -1,8 +1,7 @@
 ---
 - name: Update db servers
-  hosts: localhost
-  remote_user: root
-  become: yes
+  hosts: db
+  become: true
 
   tasks:
     - name: Ensure PostgreSQL and psycopg2 are installed
@@ -20,42 +19,47 @@
         state: started
         enabled: true
 
-    - name: Create database
-      community.postgresql.postgresql_db:
-        name: "{{ db_name }}"
-        state: present
-      become_user: postgres
+    - block:
+        - name: Create DB user with password
+          community.postgresql.postgresql_user:
+            name: "{{ db_user }}"
+            password: "{{ db_password }}"
+            state: present
+            login_user: postgres
 
-    - name: Create database user with password
-      community.postgresql.postgresql_user:
-        name: "{{ db_user }}"
-        password: "{{ db_password }}"
-        state: present
-      become_user: postgres
+        - name: Create database owned by the user
+          community.postgresql.postgresql_db:
+            name: "{{ db_name }}"
+            owner: "{{ db_user }}"
+            state: present
+            login_user: postgres
 
-    - name: Grant ALL privileges on DB to user
-      community.postgresql.postgresql_privs:
-        database: "{{ db_name }}"
-        roles: "{{ db_user }}"
-        type: database
-        privs: ALL
-        state: present
-      become_user: postgres
+        - name: Grant ALL privileges on DB to user
+          community.postgresql.postgresql_privs:
+            database: "{{ db_name }}"
+            roles: "{{ db_user }}"
+            type: database
+            privs: ALL
+            state: present
+            login_user: postgres
 
-    - name: Set listen_addresses in postgresql.conf
-      community.postgresql.postgresql_set:
-        name: listen_addresses
-        value: "{{ pg_listen_ip }}"
+        - name: Set listen_addresses via ALTER SYSTEM
+          community.postgresql.postgresql_alter_system:
+            param: listen_addresses
+            value: "{{ pg_listen_ip }}"
+            login_user: postgres
+          notify: Restart PostgreSQL
       become_user: postgres
-      notify: Restart PostgreSQL
 
     - name: Add pg_hba rule
       community.postgresql.postgresql_pg_hba:
         dest: "/etc/postgresql/16/main/pg_hba.conf"
+        contype: host
+        databases: ["all"]
+        users: ["all"]
         address: "{{ pg_allowed_net }}"
         method: scram-sha-256
         state: present
-      become_user: postgres
       notify: Restart PostgreSQL
 
   handlers:
