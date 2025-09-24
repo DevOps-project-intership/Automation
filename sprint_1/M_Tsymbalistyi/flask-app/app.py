@@ -1,6 +1,5 @@
 import os
 import datetime
-import sqlite3
 import psycopg2
 from psycopg2.extras import RealDictCursor
 from flask import Flask, render_template, request,url_for, redirect, session, flash
@@ -33,6 +32,7 @@ def get_db_connection():
         cursor_factory=RealDictCursor
     )
     return conn
+
 
 def get_post(post_id):
     conn = get_db_connection()
@@ -76,11 +76,14 @@ def get_fetchone(sql):
         conn.close()
     return data
 
-def post_sql(sql):
+def post_sql(sql, params=None):
     conn = get_db_connection()
     try:
         with conn.cursor() as cur:
-            cur.execute(sql)
+            if params:
+                cur.execute(sql, params)
+            else:
+                cur.execute(sql)
         conn.commit()
     finally:
         conn.close()
@@ -118,7 +121,7 @@ def register():
 
         hashed_pw = generate_password_hash(password)
 
-        post_sql(f"INSERT INTO users (username, password) VALUES ({username}, {hashed_pw})")    
+        post_sql("INSERT INTO users (username, password) VALUES (%s, %s)", (username, hashed_pw))    
         flash("Account created! You can now log in.", "success")
         return redirect(url_for("login"))
     return render_template("register.html")
@@ -133,7 +136,7 @@ def login():
         # conn = get_db_connection()
         # user = conn.execute("SELECT * FROM users WHERE username = ?", (username,)).fetchone()
         # conn.close()
-        user = get_fetchone(f"SELECT * FROM users WHERE username = {username}")
+        user = get_fetchone(f"SELECT * FROM users WHERE username = '{username}'")
 
         if user and check_password_hash(user["password"], password):
             session["user_id"] = user["id"]
@@ -153,22 +156,22 @@ def logout():
     flash("Logged out.", "info")
     return redirect(url_for("home"))
 
-@app.route('/edit/<int:id>', methods=('GET', 'POST'))
-@login_required
-def edit(id):
-    post = get_post(id)
+# @app.route('/edit/<int:id>', methods=('GET', 'POST'))
+# @login_required
+# def edit(id):
+#     post = get_post(id)
 
-    if request.method == 'POST':
-        title = request.form['title']
-        content = request.form['content']
+#     if request.method == 'POST':
+#         title = request.form['title']
+#         content = request.form['content']
 
-        if not title:
-            flash('Title is required!')
-        else:
-            post_sql(f'UPDATE posts SET title = {title}, content = {content} WHERE id = {id}')
-            return redirect(url_for('index'))
+#         if not title:
+#             flash('Title is required!')
+#         else:
+#             post_sql(f'UPDATE posts SET title = {title}, content = {content} WHERE id = {id}')
+#             return redirect(url_for('index'))
 
-    return render_template('edit.html', post=post)
+#     return render_template('edit.html', post=post)
 
 @app.route('/delete/<int:id>', methods=('POST',))
 @login_required
