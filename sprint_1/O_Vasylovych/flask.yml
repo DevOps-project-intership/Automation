@@ -3,6 +3,7 @@
   hosts: server
   remote_user: vagrant
   become: yes
+
   tasks:
     - name: Ensure that nginx is installed
       ansible.builtin.apt:
@@ -23,9 +24,46 @@
           - python3-pip
           - python3-flask
           - gunicorn
+          - python3-psycopg2
+          - python3-dotenv
         state: present
         update_cache: yes
-   
+
+    - name: Ensure app user exists
+      ansible.builtin.user:
+        name: "{{ app_user }}"
+        create_home: yes
+        shell: /usr/sbin/nologin
+
+    - name: Ensure app directory exists
+      ansible.builtin.file:
+        path: "{{ app_dir }}"
+        state: directory
+        owner: "{{ app_user }}"
+        group: "{{ app_user }}"
+        mode: "0755"
+
+    - name: Drop .env from template
+      ansible.builtin.template:
+        src: env.j2
+        dest: "{{ app_env_file }}"
+        owner: "{{ app_user }}"
+        group: "{{ app_user }}"
+        mode: "0600"
+
+    - name: Install systemd unit from template
+      ansible.builtin.template:
+        src: flask.service.j2
+        dest: /etc/systemd/system/flask.service
+        mode: "0644"
+      notify: Reload systemd
+
+    - name: Enable & start Flask service
+      ansible.builtin.systemd:
+        name: flask
+        enabled: true
+        state: started
+
     - name: Deploy Nginx reverse proxy config
       ansible.builtin.template:
         src: flask.conf.j2
@@ -44,3 +82,7 @@
       ansible.builtin.systemd:
         name: nginx
         state: reloaded
+
+    - name: Reload systemd
+      ansible.builtin.systemd:
+        daemon_reload: true
