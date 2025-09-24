@@ -1,0 +1,15 @@
+[Unit]
+Description=Flask app (Gunicorn)
+After=network.target
+
+[Service]
+User={{ app_user }}
+Group=www-data
+WorkingDirectory={{ app_dir }}
+EnvironmentFile={{ app_env_file }}
+ExecStart=/usr/bin/gunicorn -w {{ gunicorn_workers }} -b {{ app_bind }} {{ app_module }}
+Restart=always
+RestartSec=3
+
+[Install]
+WantedBy=multi-user.target
