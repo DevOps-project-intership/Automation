@@ -9,7 +9,7 @@ from werkzeug.utils import secure_filename
 from functools import wraps
 from dotenv import load_dotenv
 
-load_dotenv(".env")
+load_dotenv(dotenv_path=".env")
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.getenv("SECRET_KEY")
@@ -50,27 +50,33 @@ def get_user_posts(user_id):
     conn = get_db_connection()
     try:
         with conn.cursor() as cur:
-            cur.execute(f'SELECT * FROM posts WHERE user_id = {user_id}')
+            cur.execute(f'SELECT * FROM posts WHERE user_id = %s', (user_id,))
             posts = cur.fetchall()
     finally:
         conn.close()
     return posts
 
-def get_fetchall(sql):
+def get_fetchall(sql, params=None):
     conn = get_db_connection()
     try:
         with conn.cursor() as cur:
-            cur.execute(sql)
+            if params:
+                cur.execute(sql, params)
+            else:
+                cur.execute(sql)
             data = cur.fetchall()
     finally:
         conn.close()
     return data
 
-def get_fetchone(sql):
+def get_fetchone(sql, params=None):
     conn = get_db_connection()
     try:
         with conn.cursor() as cur:
-            cur.execute(sql)
+            if params:
+                cur.execute(sql, params)
+            else:
+                cur.execute(sql)
             data = cur.fetchone()
     finally:
         conn.close()
@@ -133,10 +139,7 @@ def login():
         username = request.form["username"]
         password = request.form["password"]
 
-        # conn = get_db_connection()
-        # user = conn.execute("SELECT * FROM users WHERE username = ?", (username,)).fetchone()
-        # conn.close()
-        user = get_fetchone(f"SELECT * FROM users WHERE username = '{username}'")
+        user = get_fetchone("SELECT * FROM users WHERE username = %s", (username,))
 
         if user and check_password_hash(user["password"], password):
             session["user_id"] = user["id"]
@@ -156,22 +159,22 @@ def logout():
     flash("Logged out.", "info")
     return redirect(url_for("home"))
 
-# @app.route('/edit/<int:id>', methods=('GET', 'POST'))
-# @login_required
-# def edit(id):
-#     post = get_post(id)
+@app.route('/edit/<int:id>', methods=('GET', 'POST'))
+@login_required
+def edit(id):
+    post = get_post(id)
 
-#     if request.method == 'POST':
-#         title = request.form['title']
-#         content = request.form['content']
+    if request.method == 'POST':
+        title = request.form['title']
+        content = request.form['content']
 
-#         if not title:
-#             flash('Title is required!')
-#         else:
-#             post_sql(f'UPDATE posts SET title = {title}, content = {content} WHERE id = {id}')
-#             return redirect(url_for('index'))
+        if not title:
+            flash('Title is required!')
+        else:
+            post_sql(f'UPDATE posts SET title = {title}, content = {content} WHERE id = {id}')
+            return redirect(url_for('index'))
 
-#     return render_template('edit.html', post=post)
+    return render_template('edit.html', post=post)
 
 @app.route('/delete/<int:id>', methods=('POST',))
 @login_required
@@ -198,7 +201,7 @@ def create():
             file.save(filepath)
 
             post_sql(
-                f'INSERT INTO posts (user_id, location, image_path) VALUES ({session["user_id"]}, {location}, images/{filename})'
+                'INSERT INTO posts (user_id, location, image_path) VALUES (%s, %s, %s)', (session["user_id"], location, f"images/{filename}")
             )
             return redirect(url_for('index'))
 
