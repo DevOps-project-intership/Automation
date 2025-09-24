@@ -3,11 +3,11 @@ Description=Flask app (Gunicorn)
 After=network.target
 
 [Service]
-User={{ app_user }}
+User=flaskapp
 Group=www-data
-WorkingDirectory={{ app_dir }}
-EnvironmentFile={{ app_env_file }}
-ExecStart=/usr/bin/gunicorn -w {{ gunicorn_workers }} -b {{ app_bind }} {{ app_module }}
+WorkingDirectory=/home/vagrant/Hot-Peppers/sprint_1/M_Tsymbalistyi/flask-app
+EnvironmentFile=/home/vagrant/Hot-Peppers/sprint_1/M_Tsymbalistyi/flask-app/template.env
+ExecStart=/usr/bin/gunicorn -w 2 -b 0.0.0.0:8000 app:app
 Restart=always
 RestartSec=3
 
