@@ -1,0 +1,26 @@
+pipeline {
+    agent any
+
+    stages {
+        stage('Configure Machine 1') {
+            steps {
+                echo "Starting the pipeline for Machine 1"
+                build job: 'Pipeline-Machine-1', wait: true
+            }
+        }
+
+        stage('Configure Machine 2') {
+            steps {
+                echo "Starting the pipeline for Machine 2"
+                build job: 'Pipeline-Machine-2', wait: true
+            }
+        }
+
+        stage('Configure Machine 3') {
+            steps {
+                echo "Starting the pipeline for Machine 3"
+                build job: 'Pipeline-Machine-3', wait: true
+            }
+        }
+    }
+}

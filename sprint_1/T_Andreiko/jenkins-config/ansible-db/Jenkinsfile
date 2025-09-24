@@ -1,0 +1,55 @@
+pipeline {
+
+    agent any
+
+    options {
+        timestamps()
+    }
+
+    environment {
+        REPO_URL = 'https://github.com/DevOps-project-intership/Hot-Peppers.git'
+        BRANCH_TO_BUILD = 'HP-25-Create-Ansible-playbooks'
+    }
+
+
+    stages {
+        stage('Checkout target branch') {
+            steps {
+                script {
+                    checkout([
+                        $class: 'GitSCM',
+                        branches: [[name: "*/${BRANCH_TO_BUILD}"]],
+                        userRemoteConfigs: [[
+                            url: "${REPO_URL}",
+                            credentialsId: 'test-ansible'
+                        ]]
+                    ])
+                }
+            }
+        }
+
+
+        stage('Run Ansible server-playbook') {
+            steps {
+                withCredentials([string(credentialsId: 'DB_credential', variable: 'DB_PASSWORD')]) {
+                    sh '''
+                    ansible-playbook -i /home/jenkins/inventory.ini sprint_1/O_Vasylovych/db.yml --extra-vars "db_password=${DB_PASSWORD}"
+                    '''
+                }
+            }
+        }
+
+
+    }
+
+    post {
+
+        success {
+            echo 'Pipeline has successfully passed!'
+        }
+
+        failure {
+            echo 'Pipeline ended with an error!'
+        }
+    }
+}
