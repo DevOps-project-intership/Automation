@@ -1,6 +1,6 @@
 app_user: flaskapp
-app_dir: /opt/flaskapp
-app_env_file: /opt/flaskapp/.env
+app_dir: Hot-Peppers/sprint_1/M_Tsymbalistyi/flask-app/
+app_env_file: Hot-Peppers/sprint_1/M_Tsymbalistyi/flask-app/template.env
 app_bind: 0.0.0.0:8000
 gunicorn_workers: 2
 app_module: app:app
