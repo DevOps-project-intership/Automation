@@ -6,7 +6,12 @@
   become: yes
 
   vars:
-    pg_conf_path: "/etc/postgresql/16/main" 
+    db_host: 192.168.56.111
+    db_name: bird
+    db_user: flask
+    pg_allowed_net: 192.168.56.0/24
+    pg_listen_ip: 192.168.56.110
+    pg_conf_path: /etc/postgresql/16/main
 
   tasks:
     - name: Ensure PostgreSQL and psycopg2 are installed
