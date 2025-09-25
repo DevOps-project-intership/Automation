@@ -1,21 +1,20 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<h1>{% block title %} Edit "{{ post['title'] }}" {% endblock %}</h1>
+<h1>{% block title %} Edit {% endblock %}</h1>
 
-<form method="post">
+<form method="post" enctype="multipart/form-data">
     <div class="form-group">
-        <label for="title">Title</label>
-        <input type="text" name="title" placeholder="Post title"
+        <label for="location">Location</label>
+        <input type="text" name="location" placeholder="Post location"
                class="form-control"
-               value="{{ request.form['title'] or post['title'] }}">
+               value="{{ request.form['location'] or post['location'] }}">
         </input>
     </div>
 
     <div class="form-group">
-        <label for="content">Content</label>
-        <textarea name="content" placeholder="Post content"
-                  class="form-control">{{ request.form['content'] or post['content'] }}</textarea>
+        <label for="image">Image</label>
+        <input type="file" name="image" class="form-control" accept="image/*">
     </div>
     <div class="form-group">
         <button type="submit" class="btn btn-primary">Submit</button>

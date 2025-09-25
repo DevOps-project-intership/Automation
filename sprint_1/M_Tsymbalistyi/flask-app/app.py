@@ -22,6 +22,7 @@ app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
+# todo: change to sqlAlchemy
 def get_db_connection():
     conn = psycopg2.connect(
         host=os.getenv("DATABASE_HOST"),
@@ -103,6 +104,7 @@ def login_required(f):
         return f(*args, **kwargs)
     return decorated_function
 
+
 @app.route('/')
 @login_required
 def index():
@@ -165,14 +167,44 @@ def edit(id):
     post = get_post(id)
 
     if request.method == 'POST':
-        title = request.form['title']
-        content = request.form['content']
-
-        if not title:
-            flash('Title is required!')
-        else:
-            post_sql(f'UPDATE posts SET title = {title}, content = {content} WHERE id = {id}')
+        location = request.form.get('location', '').strip()
+        file = request.files.get('image')
+        
+        if not location:
+            flash('location is required!')
+            return render_template('edit.html', post=post)
+        
+        image_path = None
+        if file and file.filename:
+            if not allowed_file(file.filename):
+                flash('Invalid file type!')
+                return render_template('edit.html', post=post)
+            
+            timestamp = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
+            filename = secure_filename(f"{timestamp}_{file.filename}")
+            filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+            
+            try:
+                os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
+                file.save(filepath)
+                image_path = f"images/{filename}"
+            except OSError as e:
+                print(f'Error saving file: {e}')
+                return render_template('edit.html', post=post)
+        
+        try:
+            if image_path:
+                post_sql('UPDATE posts SET location = %s, image_path = %s WHERE id = %s', 
+                        (location, image_path, id))
+            else:
+                post_sql('UPDATE posts SET location = %s WHERE id = %s', (location, id))
+            
+            flash('Post updated successfully!')
             return redirect(url_for('index'))
+            
+        except Exception as e:
+            print(f'Database error: {e}')
+            return render_template('edit.html', post=post)
 
     return render_template('edit.html', post=post)
 
