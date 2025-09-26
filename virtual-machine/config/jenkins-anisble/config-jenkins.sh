@@ -1,5 +1,6 @@
 #/bin/bash
 
+
 function ansible_setup {
         echo "Checking is Ansible exist"
         ansible --version &> /dev/null
@@ -12,6 +13,7 @@ function ansible_setup {
         fi
         echo "Ansible installed"
 }
+
 
 function java_setup {
         echo "Checking is Java exist"
@@ -26,6 +28,7 @@ function java_setup {
         fi
         echo "Java installed"
 }
+
 
 function jenkins_setup {
         echo "Checking is Jenkins exist"
@@ -43,6 +46,7 @@ function jenkins_setup {
         echo "Jenkins installed"
 }
 
+
 function additional_packages {
         echo "Checking is Python3 exist"
         sudo python3 --version &> /dev/null
@@ -53,11 +57,13 @@ function additional_packages {
         echo "Python3 installed"
 }
 
+
 function main {
         additional_packages
         ansible_setup
         java_setup
         jenkins_setup
 }
+
 
 main
