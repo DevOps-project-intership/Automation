@@ -1,7 +1,7 @@
-### What was done in PR?
+## What was done in PR?
 
-### Why this PR is required?
+## Why this PR is required?
 
-### How to validate this PR?
+## How to validate this PR?
 
-### Additional information
+## Additional information
