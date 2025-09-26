@@ -1,2 +1,5 @@
 vagrant/.vagrant
-sprint_1/T_Andreiko/vagrant-vm-config/inventory.ini
+
+
+vagrant/inventory.ini
+vagrant/scripts/jenkins_makeself.sh
