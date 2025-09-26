@@ -1,0 +1,88 @@
+
+
+Vagrant.configure("2") do |config|
+
+
+
+  # ---------------- IP-addresses and ports ----------------
+  SERVER_IP             = ENV['SERVER_IP']              || "192.168.56.110"
+  DATABASE_IP           = ENV['DATABASE_IP']            || "192.168.56.111"
+  LOAD_BALANCER_IP      = ENV['LOAD_BALANCER_IP']       || "192.168.56.112"
+
+  SERVER_PORT           = ENV['SERVER_PORT']            || 8080
+  DATABASE_PORT         = ENV['DATABASE_PORT']          || 5432
+  LOAD_BALANCER_PORT    = ENV['LOAD_BALANCER_PORT']     || 80
+
+
+
+  # ---------------- SERVER ----------------
+
+  config.vm.define "server" do |server|
+    server.vm.box = "bento/ubuntu-24.04"
+    server.vm.network "private_network", ip: SERVER_IP
+    server.vm.network "forwarded_port", guest: 80, host: SERVER_PORT
+
+    server.vm.provider "virtualbox" do |vb|
+      vb.name = "Flask Server"
+      vb.memory = 2048
+      vb.cpus = 2
+    end
+
+  end
+
+
+
+  # ---------------- DATABASE ----------------
+
+  config.vm.define "database" do |db|
+    db.vm.box = "bento/ubuntu-24.04"
+    db.vm.network "private_network", ip: DATABASE_IP
+    db.vm.network "forwarded_port", guest: 5432, host: DATABASE_PORT
+
+    db.vm.provider "virtualbox" do |vb|
+      vb.name = "PostgreSQL Server"
+      vb.memory = 2048
+      vb.cpus = 2
+    end
+
+  end
+
+
+
+  # ---------------- LOAD BALANCER ----------------
+
+  config.vm.define "load_balancer" do |lb|
+    lb.vm.box = "bento/ubuntu-24.04"
+    lb.vm.network "private_network", ip: LOAD_BALANCER_IP
+    lb.vm.network "forwarded_port", guest: 80, host: LOAD_BALANCER_PORT
+
+    lb.vm.provider "virtualbox" do |vb|
+      vb.name = "Load Balancer Server"
+      vb.memory = 2048
+      vb.cpus = 2
+    end
+
+  end
+
+
+
+  # ---------------- Configure inventory.ini file ----------------
+  config.vm.provision "shell", run: "always", inline: <<-SHELL
+    cat > /vagrant/inventory.ini <<EOF
+[web-server]
+#{SERVER_IP} ansible_user=vagrant ansible_ssh_private_key_file=/home/jenkins/keys/private_key_server ansible_ssh_common_args='-o StrictHostKeyChecking=no'
+
+[database]
+#{DATABASE_IP} ansible_user=vagrant ansible_ssh_private_key_file=/home/jenkins/keys/private_key_database ansible_ssh_common_args='-o StrictHostKeyChecking=no'
+
+[load-balancer]
+#{LOAD_BALANCER_IP} ansible_user=vagrant ansible_ssh_private_key_file=/home/jenkins/keys/private_key_load_balancer ansible_ssh_common_args='-o StrictHostKeyChecking=no'
+EOF
+  SHELL
+
+
+
+  # ---------------- Create self-extracting installer ----------------
+  config.vm.provision "shell", run: "always", path: "build_installer.sh"
+
+end 
