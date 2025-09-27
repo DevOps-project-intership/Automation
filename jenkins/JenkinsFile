@@ -1,0 +1,28 @@
+pipeline {
+
+  agent any
+
+  stages {
+
+    stage('Configure PostgreSQL database') {
+
+      steps {
+        build job: 'db_pipeline', wait: true
+      }
+    }
+
+    stage('Configure Flask server') {
+
+      steps {
+        build job: 'server_pipeline', wait: true
+      }
+    }
+
+    stage('Configure Load Balancer server') {
+
+      steps {
+        build job: 'lb_pipeline', wait: true
+      }
+    }
+  }
+}
