@@ -1,0 +1,36 @@
+pipeline {
+
+  agent any
+
+  environment {
+    DB_PASSWORD = credentials('db_password')
+  }
+
+  stages {
+
+    stage('Checkout') {
+
+      steps {
+        checkout scm
+      }
+    }
+
+    stage('Run Ansible') {
+
+      steps {
+
+        sshagent(credentials: ['db']) {
+
+          sh '''
+            ansible-galaxy collection install -r ansible/collections/requirements.yml --force
+
+            export ANSIBLE_HOST_KEY_CHECKING=False
+            ansible-playbook -i ansible/inventory.ini ansible/db.yml \
+              -e db_password="$DB_PASSWORD"
+          '''
+          
+        }
+      }
+    }
+  }
+}
