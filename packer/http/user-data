@@ -1,0 +1,49 @@
+#cloud-config
+autoinstall:
+  version: 1
+  locale: en_US
+
+  keyboard:
+    layout: us
+
+  identity:
+    hostname: ubuntu-vagrant
+    username: vagrant
+    password: "$6$rounds=4096$ntlX/dlo6b$HXaLN4RcLIGaEDdQdR2VTYi9pslSeXWL131MqaakqE285Nv0kW9KRontQYivCbycZerUMcjVsuLl2V8bbdadI1"
+
+  ssh:
+      install-server: true
+
+      # turn off ssh connection with user password
+      allow-pw: false  
+
+      authorized-keys:
+        - "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAINCECck/84MIMqfLcNmFRSmJBx8sT+O56f+fQ+JOVLoZ andr@DESKTOP-BKKH8CP"
+
+  network:
+    version: 2
+    ethernets:
+      enp0s3:
+        dhcp4: true
+
+  storage:
+    layout:
+      name: direct
+
+  packages:
+  - sudo
+  - openssh-server
+  - python3
+  - python3-pip
+  - nginx
+  - net-tools
+  - curl
+
+  user-data:
+    timezone: UTC
+    disable_root: false
+
+  late-commands:
+    - echo 'vagrant ALL=(ALL) NOPASSWD:ALL' > /target/etc/sudoers.d/vagrant
+    - chmod 440 /target/etc/sudoers.d/vagrant
+  interactive-sections: []
