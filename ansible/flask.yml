@@ -16,6 +16,21 @@
         name: nginx
         state: started
         enabled: true
+     
+    - name: Ensure Nginx cache dir exists 
+      ansible.builtin.file:
+        path: /var/cache/nginx
+        state: directory
+        owner: www-data
+        group: www-data
+        mode: "0775"
+    
+    - name: Deploy http-level cache config
+      ansible.builtin.template:
+        src: "{{ playbook_dir }}/templates/cache.conf.j2"
+        dest: /etc/nginx/conf.d/cache.conf
+        mode: "0644"
+      notify: Reload nginx       
     
     - name: Ensure uploads dir exists (mount point) and is writable
       ansible.builtin.file:
@@ -34,13 +49,13 @@
         name:
           - python3
           - python3-pip
-          - python3-flask
-          - gunicorn
-          - python3-psycopg2
-          - python3-dotenv
+          - build-essential
+          - libpq-dev
+          - python3-dev
+          - python3-wheel 
         state: present
         update_cache: yes
-
+        
     - name: Ensure app user exists
       ansible.builtin.user:
         name: "{{ app_user }}"
@@ -59,7 +74,24 @@
       ansible.builtin.copy:
         src: ../flask-app/
         dest: "{{ app_dir }}/"
-        mode: "0755"   
+        mode: "0755"
+
+    - name: Create virtualenv (once)  # створюємо venv під root
+      ansible.builtin.command: python3 -m venv {{ app_dir }}/venv
+      args:
+        creates: "{{ app_dir }}/venv/bin/activate"
+
+    - name: Install Python deps into venv (as root)
+      ansible.builtin.command: "{{ app_dir }}/venv/bin/pip install -r {{ app_dir }}/requirements.txt"
+      args:
+        chdir: "{{ app_dir }}"
+
+    - name: Fix venv ownership
+      ansible.builtin.file:
+        path: "{{ app_dir }}/venv"
+        owner: "{{ app_user }}"
+        group: "{{ app_user }}"
+        recurse: yes          
 
     - name: Drop .env from template
       ansible.builtin.template:
