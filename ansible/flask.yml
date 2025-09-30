@@ -76,7 +76,7 @@
         dest: "{{ app_dir }}/"
         mode: "0755"
 
-    - name: Create virtualenv (once)  # створюємо venv під root
+    - name: Create virtualenv (once)
       ansible.builtin.command: python3 -m venv {{ app_dir }}/venv
       args:
         creates: "{{ app_dir }}/venv/bin/activate"
