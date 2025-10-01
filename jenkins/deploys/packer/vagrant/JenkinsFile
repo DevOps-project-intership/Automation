@@ -1,0 +1,31 @@
+pipeline {
+
+    agent any
+
+    environment {
+        PACKER_PLUGIN_PATH = "${env.HOME}/.packer.d/plugins"
+    }
+
+    stages {
+
+        stage('Compile Packer fileile') {
+            steps {
+                withCredentials([file(credentialsId: 'Packer-ubuntu-ssh-private-key', variable: 'SSH_KEY')]) {
+                    sh '''
+                        packer init packer/build-ubuntu-box.pkr.hcl
+                    '''
+                }
+            }
+        }
+
+        stage('Build Packer file') {
+            steps {
+                withCredentials([file(credentialsId: 'Packer-ubuntu-ssh-private-key', variable: 'SSH_KEY')]) {
+                    sh '''
+                        packer build -var ssh_private_key_file=$SSH_KEY packer/build-ubuntu-box.pkr.hcl
+                    '''
+                }
+            }
+        }
+    }
+}
