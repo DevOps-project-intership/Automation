@@ -4,3 +4,10 @@ vagrant/scripts/jenkins_makeself.sh
 
 
 packer/packer_cache/
+
+
+
+terraform/deploy-vpc-jenkins/.terraform/
+terraform/deploy-vpc-jenkins/.terraform.lock.hcl
+terraform/deploy-vpc-jenkins/terraform.tfstate
+terraform/deploy-vpc-jenkins/terraform.tfstate.backup
