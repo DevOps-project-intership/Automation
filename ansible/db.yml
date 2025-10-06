@@ -15,7 +15,7 @@
         state: present
         update_cache: true
     
-    - name: Initialize PostgreSQL database (if not already initialized)
+    - name: Initialize PostgreSQL database
       ansible.builtin.command: /usr/bin/postgresql-setup --initdb
       args:
         creates: /var/lib/pgsql/data/PG_VERSION
