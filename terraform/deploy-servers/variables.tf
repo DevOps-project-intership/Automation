@@ -6,7 +6,7 @@ variable "vpc_id" {
 
 variable "subnet_ids" {
   type        = list(string)
-  description = "Three private subnet IDs"
+  description = "List of private subnet IDs"
 }
 
 variable "key_name" {

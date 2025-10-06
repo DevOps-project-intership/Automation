@@ -13,7 +13,7 @@ resource "aws_instance" "database" {
 
   associate_public_ip_address = false
 
-  tags = {
+  tags = { 
     Name = "Database"
   }
 }
@@ -28,23 +28,23 @@ resource "aws_instance" "flask" {
 
   associate_public_ip_address = false
 
-  tags = {
-    Name = "Flask Server"
+  tags = { 
+    Name = "Flask Server" 
   }
 }
 
 
 resource "aws_instance" "loadbalancer" {
-  ami                         = "ami-0a410d510ebdc48ba"
-  instance_type               = "t3.micro"
-  subnet_id                   = var.public_subnet_id  
-  key_name                    = var.key_name
-  vpc_security_group_ids      = [var.security_group_id]
-
-  associate_public_ip_address = true  
+  ami                    = "ami-0a410d510ebdc48ba"
+  instance_type          = "t3.micro"
+  subnet_id              = var.public_subnet_id
+  key_name               = var.key_name
+  vpc_security_group_ids = [var.security_group_id]
+  
+  associate_public_ip_address = true
 
   tags = {
-    Name = "Load Balancer"
+    Name = "Load Balancer" 
   }
 }
 
@@ -55,10 +55,10 @@ resource "aws_instance" "consul" {
   subnet_id              = var.subnet_ids[3]
   key_name               = var.key_name
   vpc_security_group_ids = [var.security_group_id]
-
-  associate_public_ip_address = false
   
-  tags = {
-    Name = "Consul"
+  associate_public_ip_address = false
+
+  tags = { 
+    Name = "Consul" 
   }
 }
