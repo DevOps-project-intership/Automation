@@ -1,5 +1,5 @@
 pipeline {
-
+  
   agent any
 
   environment {
@@ -7,26 +7,19 @@ pipeline {
   }
 
   stages {
-
-    stage('Checkout') {
-
-      steps { 
-        checkout scm 
-      }
-    }
-
+  
     stage('Run Ansible') {
-
+  
       steps {
-
-        sshagent(credentials: ['server', 'server2']) {
-          
-          sh '''
-            export ANSIBLE_HOST_KEY_CHECKING=False
-
-            ansible-playbook -i ansible/inventory.ini ansible/flask.yml \
-              -e db_password="$DB_PASSWORD"
-          '''
+        withCredentials([string(credentialsId: 'github_token', variable: 'GITHUB_TOKEN')]) {
+          sshagent(credentials: ['server', 'server2']) {
+            sh '''
+              export ANSIBLE_HOST_KEY_CHECKING=False
+              ansible-playbook -i ansible/inventory.ini ansible/flask.yml \
+                -e db_password="$DB_PASSWORD" \
+                -e github_token="$GITHUB_TOKEN"
+            '''
+          }
         }
       }
     }
