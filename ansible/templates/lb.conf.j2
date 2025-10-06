@@ -1,6 +1,6 @@
 upstream flask_app {
 {% for host in groups['server'] %}
-    server {{ host }};
+    server {{ host }}:80;
 {% endfor %}
 }
 
