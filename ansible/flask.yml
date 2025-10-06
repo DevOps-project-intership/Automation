@@ -16,6 +16,12 @@
         src: "{{ playbook_dir }}/templates/cache.conf.j2"
         dest: /etc/nginx/conf.d/cache.conf
         mode: "0644"
+    
+    - name: Copy Flask app code
+      ansible.builtin.copy:
+        src: ../flask-app/
+        dest: "{{ app_dir }}/"
+        mode: "0755"   
 
     - name: Install Python deps into venv (as root)
       ansible.builtin.command: "{{ app_dir }}/venv/bin/pip install -r {{ app_dir }}/requirements.txt"
