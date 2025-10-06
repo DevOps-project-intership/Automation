@@ -5,7 +5,7 @@
 
   tasks:
     - name: Ensure PostgreSQL and psycopg2 are installed
-      ansible.builtin.apt:
+      ansible.builtin.dnf:
         name:
           - postgresql
           - postgresql-contrib
