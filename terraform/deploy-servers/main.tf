@@ -19,7 +19,7 @@ resource "aws_instance" "database" {
 }
 
 
-resource "aws_instance" "flask" {
+resource "aws_instance" "flask-1" {
   ami                    = "ami-08a686a69a7bf216e"
   instance_type          = "t3.micro"
   subnet_id              = var.subnet_ids[1]
@@ -29,7 +29,21 @@ resource "aws_instance" "flask" {
   associate_public_ip_address = false
 
   tags = { 
-    Name = "Flask Server" 
+    Name = "Flask Server 1" 
+  }
+}
+
+resource "aws_instance" "flask-2" {
+  ami                    = "ami-08a686a69a7bf216e"
+  instance_type          = "t3.micro"
+  subnet_id              = var.subnet_ids[3]
+  key_name               = var.key_name
+  vpc_security_group_ids = [var.security_group_id]
+
+  associate_public_ip_address = false
+
+  tags = { 
+    Name = "Flask Server 2" 
   }
 }
 
@@ -52,7 +66,7 @@ resource "aws_instance" "loadbalancer" {
 resource "aws_instance" "consul" {
   ami                    = "ami-0a410d510ebdc48ba"
   instance_type          = "t3.micro"
-  subnet_id              = var.subnet_ids[3]
+  subnet_id              = var.subnet_ids[4]
   key_name               = var.key_name
   vpc_security_group_ids = [var.security_group_id]
   

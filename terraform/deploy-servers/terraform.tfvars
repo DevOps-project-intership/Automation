@@ -4,7 +4,9 @@ subnet_ids = [
   "subnet-055fc13f1e7798230", 
   "subnet-0a01da13db4cb9c5e", 
   "subnet-0715c4887420cdfae", 
-  "subnet-02a7ed625b76be41e" 
+  "subnet-02a7ed625b76be41e",
+  "subnet-044b3e525ba98fd0c",
+  "subnet-0b70f9028a14c73e0" 
 ]
 
 public_subnet_id   = "subnet-02ee3d71c08c15f60"

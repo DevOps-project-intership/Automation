@@ -67,6 +67,26 @@ resource "aws_subnet" "private_4" {
   }
 }
 
+resource "aws_subnet" "private_5" {
+  vpc_id            = aws_vpc.main.id
+  cidr_block        = "10.0.6.0/24"
+  availability_zone = "eu-north-1c"
+
+  tags = {
+    Name = "private-5"
+  }
+}
+
+resource "aws_subnet" "private_6" {
+  vpc_id            = aws_vpc.main.id
+  cidr_block        = "10.0.7.0/24"
+  availability_zone = "eu-north-1c"
+
+  tags = {
+    Name = "private-6"
+  }
+}
+
 
 resource "aws_internet_gateway" "igw" {
   vpc_id = aws_vpc.main.id
@@ -144,6 +164,16 @@ resource "aws_route_table_association" "private_assoc_3" {
 
 resource "aws_route_table_association" "private_assoc_4" {
   subnet_id      = aws_subnet.private_4.id
+  route_table_id = aws_route_table.private.id
+}
+
+resource "aws_route_table_association" "private_assoc_5" {
+  subnet_id      = aws_subnet.private_5.id
+  route_table_id = aws_route_table.private.id
+}
+
+resource "aws_route_table_association" "private_assoc_6" {
+  subnet_id      = aws_subnet.private_6.id
   route_table_id = aws_route_table.private.id
 }
 

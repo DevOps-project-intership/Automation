@@ -1,0 +1,40 @@
+pipeline {
+    agent any
+    environment {
+        AWS_ACCESS_KEY_ID = credentials('aws-creds') 
+        AWS_SECRET_ACCESS_KEY = credentials('aws-creds')
+        AWS_DEFAULT_REGION = 'eu-north-1' 
+    }
+    stages {
+        stage('Terraform Init & Plan') {
+            steps {
+                sh 'terraform -chdir=terraform/deploy-servers init'
+                sh 'terraform -chdir=terraform/deploy-servers plan'
+            }
+        }
+
+        // stage('Terraform Apply') {
+        //     steps {
+        //         sh 'terraform -chdir=terraform/deploy-servers apply -auto-approve'
+        //     }
+        // }
+
+        stage('Generate inventory.ini file') {
+            steps {
+                sh 'terraform -chdir=terraform/deploy-vpc-jenkins output > terraform/deploy-servers/scripts/outputs.json'
+            }
+        }
+
+        stage('Check') {
+            steps {
+                sh 'ls terraform/deploy-servers/scripts/'
+            }
+        }
+
+        stage('Run parse file') {
+            steps {
+                sh 'python3 terraform/deploy-servers/scripts/main.py'
+            }
+        }
+    }
+}
