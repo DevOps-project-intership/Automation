@@ -7,9 +7,9 @@
     - name: Ensure PostgreSQL and psycopg2 are installed
       ansible.builtin.dnf:
         name:
-          - postgresql
-          - postgresql-server
-          - postgresql-contrib
+          - postgresql16
+          - postgresql16-server
+          - postgresql16-contrib
           - python3-psycopg2
           - acl
         state: present
@@ -17,7 +17,7 @@
 
     - name: Ensure PostgreSQL is running and enabled
       ansible.builtin.systemd:
-        name: postgresql
+        name: postgresql-16
         state: started
         enabled: true
 
