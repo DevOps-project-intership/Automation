@@ -43,7 +43,7 @@
 
         - name: Create required tables (users, posts, black_list)
           community.postgresql.postgresql_query:
-            dbname: "{{ db_name }}"
+            db: "{{ db_name }}"
             login_user: postgres
             query: |
               DROP TABLE IF EXISTS posts CASCADE;
