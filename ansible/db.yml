@@ -22,7 +22,7 @@
 
     - name: Ensure PostgreSQL is running and enabled
       ansible.builtin.systemd:
-        name: postgresql-16
+        name: postgresql
         state: started
         enabled: true
 
