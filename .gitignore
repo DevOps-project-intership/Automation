@@ -10,3 +10,8 @@ terraform/deploy-servers/.terraform/
 terraform/deploy-servers/.terraform.lock.hcl
 terraform/deploy-servers/terraform.tfstate
 terraform/deploy-servers/terraform.tfstate.backup
+
+terraform/deploy-vpc-jenkins/.terraform/
+terraform/deploy-vpc-jenkins/.terraform.lock.hcl
+terraform/deploy-vpc-jenkins/terraform.tfstate
+terraform/deploy-vpc-jenkins/terraform.tfstate.backup
