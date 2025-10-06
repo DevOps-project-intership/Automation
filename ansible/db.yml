@@ -7,17 +7,22 @@
     - name: Ensure PostgreSQL and psycopg2 are installed
       ansible.builtin.dnf:
         name:
-          - postgresql18
-          - postgresql18-server
-          - postgresql18-contrib
+          - postgresql
+          - postgresql-server
+          - postgresql-contrib
           - python3-psycopg2
           - acl
         state: present
         update_cache: true
 
+    - name: Initialize database
+      ansible.builtin.command: postgresql-setup initdb
+      args:
+        creates: /var/lib/pgsql/data/PG_VERSION   
+
     - name: Ensure PostgreSQL is running and enabled
       ansible.builtin.systemd:
-        name: postgresql-18
+        name: postgresql
         state: started
         enabled: true
 
