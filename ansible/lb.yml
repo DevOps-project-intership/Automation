@@ -5,7 +5,7 @@
   become: yes
   tasks:
     - name: Ensure that nginx is installed
-      ansible.builtin.apt:
+      ansible.builtin.dnf:
         name: nginx
         state: present
         update_cache: yes
