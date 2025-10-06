@@ -14,9 +14,11 @@
           - acl
         state: present
         update_cache: true
-
-    - name: Init DB
-      command: /usr/pgsql-16/bin/postgresql-16-setup initdb  
+    
+    - name: Initialize PostgreSQL database (if not already initialized)
+      ansible.builtin.command: /usr/bin/postgresql-setup --initdb
+      args:
+        creates: /var/lib/pgsql/data/PG_VERSION
 
     - name: Ensure PostgreSQL is running and enabled
       ansible.builtin.systemd:
