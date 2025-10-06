@@ -2,5 +2,5 @@
 variable "key_name" {
   description = "Name of SSH key"
   type        = string
-  default     = "Tsymbalistyi_M"
+  default     = "grantAdminKey"
 }
