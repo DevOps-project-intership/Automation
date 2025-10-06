@@ -4,7 +4,7 @@ After=network.target
 
 [Service]
 User={{ app_user }}
-Group=vagrant
+Group={{ app_user }}
 WorkingDirectory={{ app_dir }}
 EnvironmentFile={{ app_env_file }}
 ExecStart={{ app_dir }}/venv/bin/gunicorn --workers 2 --bind 127.0.0.1:8000 wsgi:app
