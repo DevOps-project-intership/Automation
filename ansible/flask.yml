@@ -30,6 +30,12 @@
         update_cache: yes
       become: yes    
     
+    - name: Remove old Flask app directory if it exists
+      ansible.builtin.file:
+        path: "{{ app_dir }}"
+        state: absent
+      become: yes
+
     - name: Checkout Flask app from private repo
       ansible.builtin.git:
         repo: "https://{{ github_token }}@github.com/DevOps-project-intership/BirdWatching-Flask.git"
@@ -38,7 +44,13 @@
         force: yes
         update: yes
         accept_hostkey: yes
-      become_user: "{{ app_user }}"  
+      become_user: "{{ app_user }}" 
+
+    - name: Create virtualenv
+      ansible.builtin.command: python3 -m venv {{ app_dir }}/venv
+      args:
+        creates: "{{ app_dir }}/venv/bin/activate"
+      become: yes  
 
     - name: Install Python deps into venv (as root)
       ansible.builtin.command: "{{ app_dir }}/venv/bin/pip install -r {{ app_dir }}/requirements.txt"
