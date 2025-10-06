@@ -44,7 +44,14 @@
         force: yes
         update: yes
         accept_hostkey: yes
-      become_user: "{{ app_user }}" 
+      become: yes
+
+    - name: Fix app directory ownership
+      ansible.builtin.file:
+        path: "{{ app_dir }}"
+        owner: "{{ app_user }}"
+        group: "{{ app_user }}"
+        recurse: yes 
 
     - name: Create virtualenv
       ansible.builtin.command: python3 -m venv {{ app_dir }}/venv
