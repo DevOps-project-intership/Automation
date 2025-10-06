@@ -17,11 +17,20 @@
         dest: /etc/nginx/conf.d/cache.conf
         mode: "0644"
     
-    - name: Copy Flask app code
-      ansible.builtin.copy:
-        src: ../flask-app/
-        dest: "{{ app_dir }}/"
-        mode: "0755"   
+    - name: Ensure git is installed
+      ansible.builtin.dnf:
+        name: git
+        state: present
+      become: yes
+
+    - name: Checkout Flask app from private repo
+      ansible.builtin.git:
+        repo: "https://{{ github_token }}@github.com/DevOps-project-intership/BirdWatching-Flask.git"
+        version: "main"
+        dest: "{{ app_dir }}"
+        force: yes
+        accept_hostkey: yes
+      become_user: "{{ app_user }}"  
 
     - name: Install Python deps into venv (as root)
       ansible.builtin.command: "{{ app_dir }}/venv/bin/pip install -r {{ app_dir }}/requirements.txt"
