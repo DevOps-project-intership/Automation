@@ -4,3 +4,9 @@ vagrant/scripts/jenkins_makeself.sh
 
 
 packer/packer_cache/
+
+
+terraform/deploy-servers/.terraform/
+terraform/deploy-servers/.terraform.lock.hcl
+terraform/deploy-servers/terraform.tfstate
+terraform/deploy-servers/terraform.tfstate.backup
