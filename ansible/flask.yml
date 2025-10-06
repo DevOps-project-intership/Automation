@@ -21,6 +21,13 @@
       ansible.builtin.dnf:
         name: acl
         state: present
+      become: yes
+
+    - name: Ensure git is installed
+      ansible.builtin.dnf:
+        name: git
+        state: present
+        update_cache: yes
       become: yes    
     
     - name: Checkout Flask app from private repo
