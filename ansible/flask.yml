@@ -36,6 +36,7 @@
         version: "main"
         dest: "{{ app_dir }}"
         force: yes
+        update: yes
         accept_hostkey: yes
       become_user: "{{ app_user }}"  
 
