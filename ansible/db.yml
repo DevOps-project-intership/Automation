@@ -43,7 +43,7 @@
 
         - name: Create required tables (users, posts, black_list)
           community.postgresql.postgresql_query:
-            db: "{{ db_name }}"
+            dbname: "{{ db_name }}"
             login_user: postgres
             query: |
               DROP TABLE IF EXISTS posts CASCADE;
@@ -122,7 +122,7 @@
             login_user: postgres
           notify: Restart PostgreSQL
 
-        - name: Add pg_hba rule (network allow)
+        - name: Add pg_hba rule
           community.postgresql.postgresql_pg_hba:
             dest: "/var/lib/pgsql/data/pg_hba.conf"
             contype: host
