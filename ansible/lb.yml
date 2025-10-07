@@ -30,7 +30,6 @@
         state: absent
       notify: Reload nginx
 
-    # ---- Consul files for LB ----
     - name: Ensure consul and consul-template directories exist
       ansible.builtin.file:
         path: "{{ item }}"
@@ -40,31 +39,89 @@
         - /etc/consul.d
         - /etc/consul-template.d
 
-    - name: Copy Consul config (consul.hcl)
+    - name: Drop systemd unit for consul-template
       ansible.builtin.copy:
-        src: "{{ playbook_dir }}/../consul/load-balancer/consul.hcl"
-        dest: /etc/consul.d/consul.hcl
-        mode: "0644"
-
-    - name: Copy consul-template systemd service
-      ansible.builtin.copy:
-        src: "{{ playbook_dir }}/../consul/load-balancer/consul-lb-template.service"
         dest: /etc/systemd/system/consul-template.service
         mode: "0644"
+        content: |
+          [Unit]
+          Description=Consul Template service for Nginx upstream auto-update
+          After=network-online.target consul.service
+          Wants=network-online.target
 
-    - name: Copy nginx consul-template ctmpl
+          [Service]
+          User=root
+          Group=root
+
+          ExecStart=/usr/local/bin/consul-template \
+            -config=/etc/consul-template.d/frontend-lb-template.hcl
+
+          Restart=on-failure
+          RestartSec=5s
+
+          [Install]
+          WantedBy=multi-user.target
+
+    - name: Drop Consul config (consul.hcl)
       ansible.builtin.copy:
-        src: "{{ playbook_dir }}/../consul/load-balancer/frontend-lb-conf.ctmpl"
+        dest: /etc/consul.d/consul.hcl
+        mode: "0644"
+        content: |
+          datacenter = "my-dc-1"
+
+          data_dir = "/opt/consul"
+
+          client_addr = "0.0.0.0"
+
+          ui_config{
+            enabled = true
+          }
+
+          service {
+            name = "load-balancer" # name of the service, must be the same on frontend VMs
+            id   = "load-balancer-{id}" # must be unique, like name of vm
+            port = 80
+          }
+
+          server = false
+
+          bind_addr = "[::]" # Listen on all IPv6
+          bind_addr = "0.0.0.0" # Listen on all IPv4
+
+          advertise_addr = "ip_addr" # theres have to be private ip of vm
+          retry_join = ["consul.service.consul"]
+
+    - name: Drop nginx consul-template file (frontend-lb-conf.ctmpl)
+      ansible.builtin.copy:
         dest: /etc/nginx/conf.d/frontend-lb-conf.ctmpl
         mode: "0644"
+        content: |
+          upstream frontend {
+            {{ range service "frontend" -}}
+            server {{ .Address }}:{{ .Port }};
+            {{ end }}
+          }
 
-    - name: Copy consul-template config (frontend-lb-template.hcl)
+          server {
+              listen 80;
+              location / {
+                  proxy_set_header X-Real-IP $remote_addr;
+                  proxy_pass http://frontend;
+              }
+          }
+
+    - name: Drop consul-template config (frontend-lb-template.hcl)
       ansible.builtin.copy:
-        src: "{{ playbook_dir }}/../consul/load-balancer/frontend-lb-template.hcl"
         dest: /etc/consul-template.d/frontend-lb-template.hcl
         mode: "0644"
+        content: |
+          template {
+            source      = "/etc/nginx/conf.d/frontend-lb-conf.ctmpl"
+            destination = "/etc/nginx/conf.d/lb.conf"
+            command     = "nginx -s reload"
+          }
 
-    - name: Reload systemd to register consul-template service
+    - name: Reload systemd
       ansible.builtin.systemd:
         daemon_reload: true
 
