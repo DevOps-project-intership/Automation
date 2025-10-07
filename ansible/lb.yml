@@ -95,7 +95,8 @@
       ansible.builtin.copy:
         dest: /etc/nginx/conf.d/frontend-lb-conf.ctmpl
         mode: "0644"
-        content: |
+        content: |-
+          {% raw %}
           upstream frontend {
             {{ range service "frontend" -}}
             server {{ .Address }}:{{ .Port }};
@@ -109,6 +110,7 @@
                   proxy_pass http://frontend;
               }
           }
+          {% endraw %}
 
     - name: Drop consul-template config (frontend-lb-template.hcl)
       ansible.builtin.copy:
