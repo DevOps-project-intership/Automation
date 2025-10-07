@@ -30,6 +30,7 @@
         state: absent
       notify: Reload nginx
 
+    # ---- Consul files for LB ----
     - name: Ensure consul and consul-template directories exist
       ansible.builtin.file:
         path: "{{ item }}"
@@ -39,7 +40,7 @@
         - /etc/consul.d
         - /etc/consul-template.d
 
-        - name: Copy Consul config (consul.hcl)
+    - name: Copy Consul config (consul.hcl)
       ansible.builtin.copy:
         src: "{{ playbook_dir }}/../consul/load-balancer/consul.hcl"
         dest: /etc/consul.d/consul.hcl
@@ -57,13 +58,13 @@
         dest: /etc/nginx/conf.d/frontend-lb-conf.ctmpl
         mode: "0644"
 
-    - name: Copy consul-template config
+    - name: Copy consul-template config (frontend-lb-template.hcl)
       ansible.builtin.copy:
         src: "{{ playbook_dir }}/../consul/load-balancer/frontend-lb-template.hcl"
         dest: /etc/consul-template.d/frontend-lb-template.hcl
         mode: "0644"
 
-    - name: Reload systemd
+    - name: Reload systemd to register consul-template service
       ansible.builtin.systemd:
         daemon_reload: true
 
