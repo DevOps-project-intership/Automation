@@ -43,7 +43,7 @@
 
         - name: Create required tables (users, posts, black_list)
           community.postgresql.postgresql_query:
-            db: "{{ db_name }}"
+            dbname: "{{ db_name }}"
             login_user: postgres
             query: |
               DROP TABLE IF EXISTS posts CASCADE;
@@ -70,8 +70,8 @@
                   ip_address TEXT NOT NULL UNIQUE
               );
 
-              INSERT INTO users (username, password, user_role) VALUES (root, scrypt:32768:8:1$zpJ5AjrxhFEQKSQR$8417ffc09c612344b571700b61b5672a9f1f89f8569e5db8b39ad6c20df976f2f2564dbfe046cfc68e2f80f09f3ceceb8d2292e34acb4c4bbb8ff6b4949b9521, admin); 
-
+              INSERT INTO users (username, password, user_role) VALUES
+              ('root', 'scrypt:32768:8:1$zpJ5AjrxhFEQKSQR$8417ffc09c612344b571700b61b5672a9f1f89f8569e5db8b39ad6c20df976f2f2564dbfe046cfc68e2f80f09f3ceceb8d2292e34acb4c4bbb8ff6b4949b9521', 'admin');
       become_user: postgres
 
     - block:
@@ -137,6 +137,7 @@
           notify: Restart PostgreSQL
       become_user: postgres
 
+    # --- Consul on DB node ---
     - name: Ensure Consul dirs exist
       ansible.builtin.file:
         path: "{{ item }}"
