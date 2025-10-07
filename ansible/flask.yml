@@ -16,15 +16,48 @@
         src: "{{ playbook_dir }}/templates/cache.conf.j2"
         dest: /etc/nginx/conf.d/cache.conf
         mode: "0644"
+
+    - name: Ensure ACL tools are installed (setfacl)
+      ansible.builtin.dnf:
+        name: acl
+        state: present
+      become: yes
+
+    - name: Ensure git is installed
+      ansible.builtin.dnf:
+        name: git
+        state: present
+        update_cache: yes
+      become: yes    
     
+    - name: Remove old Flask app directory if it exists
+      ansible.builtin.file:
+        path: "{{ app_dir }}"
+        state: absent
+      become: yes
+
     - name: Checkout Flask app from private repo
       ansible.builtin.git:
         repo: "https://{{ github_token }}@github.com/DevOps-project-intership/BirdWatching-Flask.git"
         version: "main"
         dest: "{{ app_dir }}"
         force: yes
+        update: yes
         accept_hostkey: yes
-      become_user: "{{ app_user }}"  
+      become: yes
+
+    - name: Fix app directory ownership
+      ansible.builtin.file:
+        path: "{{ app_dir }}"
+        owner: "{{ app_user }}"
+        group: "{{ app_user }}"
+        recurse: yes 
+
+    - name: Create virtualenv
+      ansible.builtin.command: python3 -m venv {{ app_dir }}/venv
+      args:
+        creates: "{{ app_dir }}/venv/bin/activate"
+      become: yes  
 
     - name: Install Python deps into venv (as root)
       ansible.builtin.command: "{{ app_dir }}/venv/bin/pip install -r {{ app_dir }}/requirements.txt"
@@ -72,7 +105,10 @@
         mode: "0644"
       notify: Reload nginx
 
-    - name: Ensure config and data directories exist
+    # -------------------------
+    # Consul (client) on Flask
+    # -------------------------
+    - name: Ensure consul directories exist
       ansible.builtin.file:
         path: "{{ item }}"
         state: directory
@@ -81,45 +117,45 @@
         group: consul
       loop:
         - /etc/consul.d
-        - /var/lib/consul
-    
-    - name: Drop /etc/consul.d/consul.hcl (SERVER)
-      copy:
+        - /opt/consul
+
+    - name: Drop Consul client config (consul.hcl)
+      ansible.builtin.copy:
         dest: /etc/consul.d/consul.hcl
+        mode: "0640"
         owner: consul
         group: consul
-        mode: "0640"
         content: |
           datacenter = "my-dc-1"
-          
+
           data_dir = "/opt/consul"
-          
+
           client_addr = "0.0.0.0"
-          
-          ui_config {
+
+          ui_config{
             enabled = true
           }
-          
+
           service {
             name = "frontend" # name of the service, must be the same on frontend VMs
             id   = "frontend-{id}" # must be unique, like name of vm
             port = 80
           }
-          
+
           server = false
-          
+
           bind_addr = "[::]" # Listen on all IPv6
           bind_addr = "0.0.0.0" # Listen on all IPv4
-          
+
           advertise_addr = "ip_addr" # theres have to be private ip of vm
           retry_join = ["consul.service.consul"]
-      notify: Restart consul  
+      notify: Restart consul
 
     - name: Ensure consul service is enabled and running
       ansible.builtin.systemd:
         name: consul
         enabled: true
-        state: started  
+        state: started
 
   handlers:
     - name: Reload nginx
@@ -130,8 +166,8 @@
     - name: Reload systemd
       ansible.builtin.systemd:
         daemon_reload: true
-    
+
     - name: Restart consul
       ansible.builtin.systemd:
         name: consul
-        state: restarted    
+        state: restarted
