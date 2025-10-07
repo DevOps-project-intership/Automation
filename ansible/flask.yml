@@ -146,7 +146,7 @@
 
           advertise_addr = "ip_addr" # theres have to be private ip of vm
           retry_join = ["consul.service.consul"]
-      notify: Restart consul
+      #notify: Restart consul
 
     # - name: Ensure consul service is enabled and running
     #   ansible.builtin.systemd:
