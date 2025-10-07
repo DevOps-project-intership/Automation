@@ -5,11 +5,17 @@
   become: yes
 
   tasks:
+    # --- NGINX базове ---
     - name: Ensure that nginx is installed
       ansible.builtin.dnf:
         name: nginx
         state: present
         update_cache: yes
+
+    - name: Ensure consul-template is installed
+      ansible.builtin.dnf:
+        name: consul-template
+        state: present
 
     - name: Ensure Nginx is running and enabled
       ansible.builtin.systemd:
@@ -23,6 +29,7 @@
         state: absent
       notify: Reload nginx
 
+    # --- ТВОЇ КОНСУЛ-ФАЙЛИ + консул-template ---
     - name: Ensure required directories exist
       ansible.builtin.file:
         path: "{{ item }}"
@@ -33,7 +40,7 @@
         - /etc/consul-template.d
         - /etc/nginx/conf.d
 
-    - name: Drop systemd unit for consul-template
+    - name: Drop systemd unit for consul-template (your version)
       ansible.builtin.copy:
         dest: /etc/systemd/system/consul-template.service
         mode: "0644"
@@ -56,7 +63,7 @@
           [Install]
           WantedBy=multi-user.target
 
-    - name: Drop Consul config (LB agent)
+    - name: Drop Consul config (LB agent) - your consul.hcl
       ansible.builtin.copy:
         dest: /etc/consul.d/consul.hcl
         mode: "0644"
@@ -85,11 +92,12 @@
           advertise_addr = "ip_addr"
           retry_join = ["consul.service.consul"]
 
-    - name: Drop nginx consul-template file (frontend-lb-conf.ctmpl)
+    - name: Drop nginx consul-template file (frontend-lb-conf.ctmpl) - your template
       ansible.builtin.copy:
         dest: /etc/nginx/conf.d/frontend-lb-conf.ctmpl
         mode: "0644"
-        content: |
+        content: |-
+          {% raw %}
           upstream frontend {
             {{ range service "frontend" -}}
             server {{ .Address }}:{{ .Port }};
@@ -103,8 +111,9 @@
                   proxy_pass http://frontend;
               }
           }
+          {% endraw %}
 
-    - name: Drop consul-template config (frontend-lb-template.hcl)
+    - name: Drop consul-template config (frontend-lb-template.hcl) - your config
       ansible.builtin.copy:
         dest: /etc/consul-template.d/frontend-lb-template.hcl
         mode: "0644"
@@ -125,14 +134,15 @@
         enabled: true
         state: started
 
-    - name: Ensure consul service is started
+    - name: Ensure consul service is started (your step)
       ansible.builtin.systemd:
         name: consul
         enabled: true
-        state: started   
+        state: started
 
   handlers:
     - name: Reload nginx
       ansible.builtin.systemd:
         name: nginx
         state: reloaded
+        
