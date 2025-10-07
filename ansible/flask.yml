@@ -105,9 +105,6 @@
         mode: "0644"
       notify: Reload nginx
 
-    # -------------------------
-    # Consul (client) on Flask
-    # -------------------------
     - name: Ensure consul directories exist
       ansible.builtin.file:
         path: "{{ item }}"
