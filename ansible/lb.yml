@@ -39,27 +39,27 @@
         - /etc/consul.d
         - /etc/consul-template.d
 
-    - name: Copy Consul config (consul.hcl)
+        - name: Copy Consul config (consul.hcl)
       ansible.builtin.copy:
-        src: "../consul/load-balancer/consul.hcl"
+        src: "{{ playbook_dir }}/../consul/load-balancer/consul.hcl"
         dest: /etc/consul.d/consul.hcl
         mode: "0644"
 
     - name: Copy consul-template systemd service
       ansible.builtin.copy:
-        src: "../consul/load-balancer/consul-lb-template.service"
+        src: "{{ playbook_dir }}/../consul/load-balancer/consul-lb-template.service"
         dest: /etc/systemd/system/consul-template.service
         mode: "0644"
 
     - name: Copy nginx consul-template ctmpl
       ansible.builtin.copy:
-        src: "../consul/load-balancer/frontend-lb-conf.ctmpl"
+        src: "{{ playbook_dir }}/../consul/load-balancer/frontend-lb-conf.ctmpl"
         dest: /etc/nginx/conf.d/frontend-lb-conf.ctmpl
         mode: "0644"
 
     - name: Copy consul-template config
       ansible.builtin.copy:
-        src: "../consul/load-balancer/frontend-lb-template.hcl"
+        src: "{{ playbook_dir }}/../consul/load-balancer/frontend-lb-template.hcl"
         dest: /etc/consul-template.d/frontend-lb-template.hcl
         mode: "0644"
 
