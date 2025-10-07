@@ -5,7 +5,7 @@
   become: yes
 
   tasks:
-    # --- NGINX базове ---
+    
     - name: Ensure that nginx is installed
       ansible.builtin.dnf:
         name: nginx
@@ -29,7 +29,6 @@
         state: absent
       notify: Reload nginx
 
-    # --- ТВОЇ КОНСУЛ-ФАЙЛИ + консул-template ---
     - name: Ensure required directories exist
       ansible.builtin.file:
         path: "{{ item }}"
@@ -113,7 +112,7 @@
           }
           {% endraw %}
 
-    - name: Drop consul-template config (frontend-lb-template.hcl) - your config
+    - name: Drop consul-template config (frontend-lb-template.hcl)
       ansible.builtin.copy:
         dest: /etc/consul-template.d/frontend-lb-template.hcl
         mode: "0644"
@@ -134,7 +133,7 @@
         enabled: true
         state: started
 
-    - name: Ensure consul service is started (your step)
+    - name: Ensure consul service is started
       ansible.builtin.systemd:
         name: consul
         enabled: true
@@ -145,4 +144,3 @@
       ansible.builtin.systemd:
         name: nginx
         state: reloaded
-        
