@@ -148,11 +148,11 @@
           retry_join = ["consul.service.consul"]
       notify: Restart consul
 
-    - name: Ensure consul service is enabled and running
-      ansible.builtin.systemd:
-        name: consul
-        enabled: true
-        state: started
+    # - name: Ensure consul service is enabled and running
+    #   ansible.builtin.systemd:
+    #     name: consul
+    #     enabled: true
+    #     state: started
 
   handlers:
     - name: Reload nginx
@@ -164,7 +164,7 @@
       ansible.builtin.systemd:
         daemon_reload: true
 
-    - name: Restart consul
-      ansible.builtin.systemd:
-        name: consul
-        state: restarted
+    # - name: Restart consul
+    #   ansible.builtin.systemd:
+    #     name: consul
+    #     state: restarted
