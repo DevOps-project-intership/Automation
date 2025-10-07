@@ -175,11 +175,11 @@
           advertise_addr = "ip_addr"                 # <- приватна IP цієї VM
           retry_join     = ["consul.service.consul"] # або IP сервера Consul
 
-    - name: Ensure consul service is enabled and running
-      ansible.builtin.systemd:
-        name: consul
-        enabled: true
-        state: started
+    # name: Ensure consul service is enabled and running
+    #   ansible.builtin.systemd:
+    #     name: consul
+    #     enabled: true
+    #     state: started
 
   handlers:
     - name: Restart PostgreSQL
