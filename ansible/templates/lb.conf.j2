@@ -1,32 +1,13 @@
-# /etc/nginx/conf.d/lb.conf
-
-
 upstream flask_app {
-    server 10.0.3.252:80;
-    server 10.0.5.200:80;
+{% for host in groups['server'] %}
+    server {{ host }};
+{% endfor %}
 }
 
 server {
-    listen 80 default_server;
-    server_name _;
-
+    listen 80;
     location / {
-        proxy_pass http://flask_app;
-
-        proxy_set_header Host              $host;
-        proxy_set_header X-Real-IP         $remote_addr;
-        proxy_set_header X-Forwarded-For   $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
-
-        proxy_cache_bypass $http_authorization $cookie_session;
-        proxy_no_cache     $http_authorization $cookie_session;
-    }
-
-    location /static/ {
-        proxy_pass http://flask_app;
-    }
-
-    location /uploads/ {
+        proxy_set_header X-Real-IP $remote_addr;
         proxy_pass http://flask_app;
     }
 }
