@@ -1,80 +1,51 @@
 ---
-- name: Update LB server
-  hosts: load_balancer
-  remote_user: root
-  become: yes
+- name: Push Consul config (SERVER) and restart service
+  hosts: consul
+  become: true
 
   tasks:
-    - name: Ensure that nginx is installed
-      ansible.builtin.dnf:
-        name: nginx
-        state: present
-        update_cache: yes
-
-    - name: Ensure Nginx is running and enabled
-      ansible.builtin.systemd:
-        name: nginx
-        state: started
-        enabled: true
-
-    - name: Deploy Nginx load balancer config
-      ansible.builtin.template:
-        src: lb.conf.j2
-        dest: /etc/nginx/conf.d/lb.conf
-        mode: "0644"
-      notify: Reload nginx
-
-    - name: Remove default site
-      ansible.builtin.file:
-        path: /etc/nginx/conf.d/default.conf
-        state: absent
-      notify: Reload nginx
-
-    - name: Ensure consul and consul-template directories exist
+    - name: Ensure config and data directories exist
       ansible.builtin.file:
         path: "{{ item }}"
         state: directory
-        mode: "0755"
+        mode: "0750"
+        owner: consul
+        group: consul
       loop:
         - /etc/consul.d
-        - /etc/consul-template.d
-
-    - name: Copy Consul config (consul.hcl)
-      ansible.builtin.copy:
-        src: "../consul/load-balancer/consul.hcl"
+        - /var/lib/consul
+    
+    - name: Drop /etc/consul.d/consul.hcl (SERVER)
+      copy:
         dest: /etc/consul.d/consul.hcl
-        mode: "0644"
+        owner: consul
+        group: consul
+        mode: "0640"
+        content: |
+          datacenter  = "my-dc-1"
+          data_dir    = "/var/lib/consul"
+          client_addr = "0.0.0.0"
 
-    - name: Copy consul-template systemd service
-      ansible.builtin.copy:
-        src: "../consul/load-balancer/consul-lb-template.service"
-        dest: /etc/systemd/system/consul-template.service
-        mode: "0644"
+          ui_config {
+            enabled = true
+          }
 
-    - name: Copy nginx consul-template ctmpl
-      ansible.builtin.copy:
-        src: "../consul/load-balancer/frontend-lb-conf.ctmpl"
-        dest: /etc/nginx/conf.d/frontend-lb-conf.ctmpl
-        mode: "0644"
+          bind_addr      = "0.0.0.0"
+          advertise_addr = "10.0.2.10"
 
-    - name: Copy consul-template config
-      ansible.builtin.copy:
-        src: "../consul/load-balancer/frontend-lb-template.hcl"
-        dest: /etc/consul-template.d/frontend-lb-template.hcl
-        mode: "0644"
-
-    - name: Reload systemd
+          server           = true
+          bootstrap_expect = 1
+      notify: Restart consul
+    
+    - name: Ensure consul service is enabled and running
       ansible.builtin.systemd:
-        daemon_reload: true
-
-    - name: Enable and start consul-template service
-      ansible.builtin.systemd:
-        name: consul-template
+        name: consul
         enabled: true
         state: started
-
+      
   handlers:
-    - name: Reload nginx
-      ansible.builtin.systemd:
-        name: nginx
-        state: reloaded
+    - name: Restart consul
+      service:
+        name: consul
+        state: restarted
+        enabled: true
