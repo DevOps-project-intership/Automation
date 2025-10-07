@@ -12,6 +12,7 @@
           - postgresql16-contrib
           - python3-psycopg2
           - acl
+          - postgresql
         state: present
         update_cache: true
 
