@@ -4,7 +4,7 @@ variable "vpc_id" {
   description = "VPC ID where to create private EC2"
 }
 
-variable "subnet_ids" {
+variable "private_subnet_ids" {
   type        = list(string)
   description = "List of private subnet IDs"
 }
@@ -14,7 +14,7 @@ variable "key_name" {
   description = "SSH key name"
 }
 
-variable "security_group_id" {
+variable "jenkins_sg_id" {
   type        = string
   description = "Security group ID for private servers"
 }

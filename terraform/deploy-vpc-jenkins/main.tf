@@ -230,6 +230,6 @@ resource "aws_instance" "jenkins" {
   }
 
   tags = {
-    Name = "Jenkins-Server" 
+    Name = "Jenkins-Server-TEST" 
   }
 }

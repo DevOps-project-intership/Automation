@@ -1,40 +1,82 @@
 pipeline {
+
     agent any
+
     environment {
         AWS_ACCESS_KEY_ID = credentials('aws-creds') 
         AWS_SECRET_ACCESS_KEY = credentials('aws-creds')
         AWS_DEFAULT_REGION = 'eu-north-1' 
     }
+
+
+    parameters {
+        string(name: 'KEY_NAME', defaultValue: 'grantAdminKey', description: 'SSH key name for servers')
+    }
+
+
     stages {
-        stage('Terraform Init & Plan') {
+
+        stage('Terraform Init & Plan Jenkins-VPC Terraform modul') {
             steps {
-                sh 'terraform -chdir=terraform/deploy-servers init'
-                sh 'terraform -chdir=terraform/deploy-servers plan'
+                sh 'terraform -chdir=terraform/deploy-vpc-jenkins init -input=false'
+                sh 'terraform -chdir=terraform/deploy-vpc-jenkins plan -input=false -out=tfplan'
             }
         }
 
-        stage('Terraform Apply') {
+
+        stage('Terraform Jenkins-VPC Outputs to TFVARS') {
             steps {
-                sh 'terraform -chdir=terraform/deploy-servers apply -auto-approve'
+                sh '''
+                    mkdir -p ../deploy-servers
+                    terraform -chdir=terraform/deploy-vpc-jenkins output -json > outputs.json
+
+                    jq -r '
+                    to_entries[] |
+                    if (.value.value | type == "array") then
+                    "\\(.key) = [" + (.value.value | map("\\""+.+"\\"") | join(",")) + "]"
+                    else
+                    "\\(.key) = \\"\\(.value.value)\\""
+                    end
+                    ' outputs.json > ../deploy-servers/terraform.tfvars
+                '''
             }
         }
 
-        // stage('Generate inventory.ini file') {
-        //     steps {
-        //         sh 'terraform -chdir=terraform/deploy-vpc-jenkins output > terraform/deploy-servers/scripts/outputs.json'
-        //     }
-        // }
 
-        // stage('Check') {
-        //     steps {
-        //         sh 'ls terraform/deploy-servers/scripts/'
-        //     }
-        // }
+        stage('Terraform Apply Deploy-Servers') {
 
-        // stage('Run parse file') {
-        //     steps {
-        //         sh 'python3 terraform/deploy-servers/scripts/main.py'
-        //     }
-        // }
+            steps {
+                sh '''
+                    if [ ! -f ../deploy-servers/terraform.tfvars ]; then
+                        echo "ERROR: terraform.tfvars не знайдено!"
+                        exit 1
+                    fi
+
+                    cp ../deploy-servers/terraform.tfvars terraform/deploy-servers/
+
+                    yes | terraform -chdir=terraform/deploy-servers init -migrate-state
+
+                    terraform -chdir=terraform/deploy-servers plan -input=false \
+                        -var-file=terraform.tfvars \
+                        -var "key_name=${KEY_NAME}"
+
+                    terraform -chdir=terraform/deploy-servers apply \
+                        -input=false -auto-approve \
+                        -var "key_name=${KEY_NAME}"
+                '''
+            }
+        }
+
+
+        stage('Generate inventory.ini file for Ansible') {
+
+            steps {
+                sh '''
+                    terraform -chdir=terraform/deploy-servers output -json > terraform/deploy-servers/scripts/outputs.json
+                    python3 terraform/deploy-servers/scripts/main.py
+                    cat ansible/inventory.ini
+                '''
+            }
+        }
     }
 }
