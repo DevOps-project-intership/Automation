@@ -6,7 +6,7 @@
 
   tasks:
     - name: Execute a local shell command
-      ansible.builtin.shell: ls -laR
+      ansible.builtin.shell: ls -laR ..
       delegate_to: localhost
       become: false
       register: ls_output
