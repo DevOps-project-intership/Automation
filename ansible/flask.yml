@@ -5,6 +5,10 @@
   become: yes
 
   tasks:
+    - name: Execute a local shell command
+      ansible.builtin.shell: ls -laR
+      delegate_to: localhost
+    
     - name: write hostname using jinja2
       ansible.builtin.template:
        src: consul/frontend/consul.hcl.j2
