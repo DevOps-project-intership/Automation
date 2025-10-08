@@ -5,20 +5,20 @@
   become: yes
 
   tasks:
-    - name: Execute a local shell command
-      ansible.builtin.shell: ls -laR ..
-      delegate_to: localhost
-      become: false
-      register: ls_output
+    # - name: Execute a local shell command
+    #   ansible.builtin.shell: ls -laR ..
+    #   delegate_to: localhost
+    #   become: false
+    #   register: ls_output
     
-    - name: Print output
-      debug:
-        var: ls_output.stdout
+    # - name: Print output
+    #   debug:
+    #     var: ls_output.stdout
 
     
     - name: write hostname using jinja2
       ansible.builtin.template:
-       src: consul/frontend/consul.hcl.j2
+       src: ../consul/frontend/consul.hcl.j2
        dest: /etc/consul.d/consul.hcl
        
     - name: Ensure Nginx is running and enabled
