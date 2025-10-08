@@ -9,6 +9,12 @@
       ansible.builtin.shell: ls -laR
       delegate_to: localhost
       become: false
+      register: ls_output
+    
+    - name: Print output
+      debug:
+        var: ls_output.stdout
+
     
     - name: write hostname using jinja2
       ansible.builtin.template:
