@@ -4,12 +4,11 @@ After=network.target
 
 [Service]
 User={{ app_user }}
-Group=vagrant
+Group=ec2-user
 WorkingDirectory={{ app_dir }}
 EnvironmentFile={{ app_env_file }}
-ExecStart={{ app_dir }}/venv/bin/gunicorn --workers 2 --bind 127.0.0.1:8000 wsgi:app
+ExecStart={{ app_dir }}/venv/bin/gunicorn --workers 2 --bind 0.0.0.0:8000 wsgi:app
 Restart=always
 RestartSec=3
-
 [Install]
 WantedBy=multi-user.target

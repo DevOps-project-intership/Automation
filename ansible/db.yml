@@ -5,14 +5,21 @@
 
   tasks:
     - name: Ensure PostgreSQL and psycopg2 are installed
-      ansible.builtin.apt:
+      ansible.builtin.dnf:
         name:
-          - postgresql
-          - postgresql-contrib
+          - postgresql16
+          - postgresql16-server
+          - postgresql16-contrib
           - python3-psycopg2
           - acl
+          - postgresql
         state: present
         update_cache: true
+
+    - name: Initialize PostgreSQL database
+      ansible.builtin.command: /usr/bin/postgresql-setup --initdb
+      args:
+        creates: /var/lib/pgsql/data/PG_VERSION
 
     - name: Ensure PostgreSQL is running and enabled
       ansible.builtin.systemd:
@@ -63,6 +70,9 @@
                   id SERIAL PRIMARY KEY,
                   ip_address TEXT NOT NULL UNIQUE
               );
+
+              INSERT INTO users (username, password, user_role) VALUES
+              ('root', 'scrypt:32768:8:1$zpJ5AjrxhFEQKSQR$8417ffc09c612344b571700b61b5672a9f1f89f8569e5db8b39ad6c20df976f2f2564dbfe046cfc68e2f80f09f3ceceb8d2292e34acb4c4bbb8ff6b4949b9521', 'admin');
       become_user: postgres
 
     - block:
@@ -116,9 +126,9 @@
             login_user: postgres
           notify: Restart PostgreSQL
 
-        - name: Add pg_hba rule (network allow)
+        - name: Add pg_hba rule
           community.postgresql.postgresql_pg_hba:
-            dest: "/etc/postgresql/16/main/pg_hba.conf"
+            dest: "/var/lib/pgsql/data/pg_hba.conf"
             contype: host
             databases: all
             users: all
@@ -127,6 +137,50 @@
             state: present
           notify: Restart PostgreSQL
       become_user: postgres
+
+    - name: Ensure Consul dirs exist
+      ansible.builtin.file:
+        path: "{{ item }}"
+        state: directory
+        mode: "0750"
+        owner: consul
+        group: consul
+      loop:
+        - /etc/consul.d
+        - /opt/consul
+
+    - name: Drop /etc/consul.d/consul.hcl (DB)
+      ansible.builtin.copy:
+        dest: /etc/consul.d/consul.hcl
+        owner: consul
+        group: consul
+        mode: "0640"
+        content: |
+          # /etc/consul.d/consul.hcl
+          datacenter  = "my-dc-1"
+          data_dir    = "/opt/consul"
+          client_addr = "0.0.0.0"
+
+          ui_config {
+            enabled = true
+          }
+
+          service {
+            name = "database"      # name of the service
+            id   = "database-{id}" # must be unique, like name of vm
+            port = 80
+          }
+
+          server = false
+          bind_addr      = "0.0.0.0"
+          advertise_addr = "ip_addr"                 # <- приватна IP цієї VM
+          retry_join     = ["consul.service.consul"] # або IP сервера Consul
+
+    # name: Ensure consul service is enabled and running
+    #   ansible.builtin.systemd:
+    #     name: consul
+    #     enabled: true
+    #     state: started
 
   handlers:
     - name: Restart PostgreSQL
