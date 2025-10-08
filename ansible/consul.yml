@@ -15,26 +15,12 @@
         - /etc/consul.d
         - /var/lib/consul
     
-    - name: Drop /etc/consul.d/consul.hcl (SERVER)
-      copy:
-        dest: /etc/consul.d/consul.hcl
-        owner: consul
-        group: consul
-        mode: "0640"
-        content: |
-          datacenter  = "my-dc-1"
-          data_dir    = "/var/lib/consul"
-          client_addr = "0.0.0.0"
-
-          ui_config {
-            enabled = true
-          }
-
-          bind_addr      = "0.0.0.0"
-          advertise_addr = "10.0.2.10"
-
-          server           = true
-          bootstrap_expect = 1
+    - name: Add consul config using jinja2
+      ansible.builtin.template:
+       src: ../consul/consul-server/consul.hcl.j2
+       dest: /etc/consul.d/consul.hcl
+       mode: "0644"
+       force: true
       # notify: Restart consul
     
   #   - name: Ensure consul service is enabled and running
