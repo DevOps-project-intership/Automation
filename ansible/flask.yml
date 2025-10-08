@@ -4,23 +4,7 @@
   remote_user: ec2-user
   become: yes
 
-  tasks:
-    # - name: Execute a local shell command
-    #   ansible.builtin.shell: ls -laR ..
-    #   delegate_to: localhost
-    #   become: false
-    #   register: ls_output
-    
-    # - name: Print output
-    #   debug:
-    #     var: ls_output.stdout
-
-    
-    - name: write hostname using jinja2
-      ansible.builtin.template:
-       src: ../consul/frontend/consul.hcl.j2
-       dest: /etc/consul.d/consul.hcl
-       
+  tasks: 
     - name: Ensure Nginx is running and enabled
       ansible.builtin.systemd:
         name: nginx
@@ -132,36 +116,12 @@
         - /etc/consul.d
         - /opt/consul
 
-    - name: Drop Consul client config (consul.hcl)
-      ansible.builtin.copy:
-        dest: /etc/consul.d/consul.hcl
-        mode: "0640"
-        owner: consul
-        group: consul
-        content: |
-          datacenter = "my-dc-1"
-
-          data_dir = "/opt/consul"
-
-          client_addr = "0.0.0.0"
-
-          ui_config {
-            enabled = true
-          }
-
-          service {
-            name = "frontend" # name of the service, must be the same on frontend VMs
-            id   = "frontend-{id}" # must be unique, like name of vm
-            port = 80
-          }
-
-          server = false
-
-          bind_addr = "[::]" # Listen on all IPv6
-          bind_addr = "0.0.0.0" # Listen on all IPv4
-
-          advertise_addr = "ip_addr" # theres have to be private ip of vm
-          retry_join = ["consul.service.consul"]
+    - name: Add consul config using jinja2
+      ansible.builtin.template:
+       src: ../consul/frontend/consul.hcl.j2
+       dest: /etc/consul.d/consul.hcl
+       mode: "0644"
+       force: true
       #notify: Restart consul
 
     # - name: Ensure consul service is enabled and running
