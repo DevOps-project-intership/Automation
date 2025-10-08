@@ -8,6 +8,7 @@
     - name: Execute a local shell command
       ansible.builtin.shell: ls -laR
       delegate_to: localhost
+      become: false
     
     - name: write hostname using jinja2
       ansible.builtin.template:
