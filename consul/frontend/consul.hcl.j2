@@ -12,7 +12,7 @@ ui_config{
 
 service {
   name = "frontend" # name of the service, must be the same on frontend VMs
-  id   = "frontend-{id}" # must be unique, like name of vm
+  id   = "frontend-{{ ansible_facts['hostname'] }}" # must be unique, like name of vm
   port = 80
 }
 
