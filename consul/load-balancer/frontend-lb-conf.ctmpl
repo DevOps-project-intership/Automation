@@ -1,0 +1,13 @@
+upstream frontend {
+  {{ range service "frontend" -}}
+  server {{ .Address }}:{{ .Port }};
+  {{ end }}
+}
+
+server {
+    listen 80;
+    location / {
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_pass http://frontend;
+    }
+}
