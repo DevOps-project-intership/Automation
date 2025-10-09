@@ -12,4 +12,3 @@ plugin "aws" {
     version = "0.43.0"
     source  = "github.com/terraform-linters/tflint-ruleset-aws"
 }
-#test2
