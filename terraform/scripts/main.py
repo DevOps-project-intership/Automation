@@ -19,8 +19,8 @@ def make_servers_inventory():
             servers_file.write(f"{data['database_private_ip']['value']}\n\n")
             
             servers_file.write("[flask]\n")
-            servers_file.write(f"{data['flask-1_private_ip']['value']}\n")
-            servers_file.write(f"{data['flask-2_private_ip']['value']}\n\n")
+            servers_file.write(f"{data['flask_1_private_ip']['value']}\n")
+            servers_file.write(f"{data['flask_2_private_ip']['value']}\n\n")
             
             servers_file.write("[loadbalancer]\n")
             servers_file.write(f"{data['loadbalancer_private_ip']['value']}\n\n")
