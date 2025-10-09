@@ -23,3 +23,8 @@ variable "public_subnet_id" {
   type        = string
   description = "Public subnet ID for Load Balancer"
 }
+
+variable "private_route_table_id" {
+  type        = string
+  description = "Private route table ID (used for S3 VPC Endpoint)"
+}
