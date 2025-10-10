@@ -1,6 +1,6 @@
 ---
 - name: Update LB server
-  hosts: load_balancer
+  hosts: loadbalancer
   remote_user: root
   become: yes
 
