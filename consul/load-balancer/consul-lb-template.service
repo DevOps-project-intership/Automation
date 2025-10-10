@@ -7,7 +7,7 @@ Wants=network-online.target
 User=root
 Group=root
 
-ExecStart=/usr/local/bin/consul-template \
+ExecStart=/usr/bin/consul-template \
   -config=/etc/consul-template.d/frontend-lb-template.hcl
 
 Restart=on-failure
