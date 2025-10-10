@@ -1,6 +1,6 @@
 ---
 - name: Update db servers
-  hosts: db
+  hosts: database
   become: true
 
   tasks:
