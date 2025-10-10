@@ -6,7 +6,7 @@ pipeline {
         sshagent(credentials: ['consul']) {
           sh '''
             export ANSIBLE_HOST_KEY_CHECKING=False
-            ansible-playbook -i ansible/inventory.ini ansible/consul.yml
+            ansible-playbook -i /var/lib/jenkins/workspace/Run Servers/ansible/inventories/inventory_consul.ini ansible/consul.yml
           '''
         }
       }
