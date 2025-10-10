@@ -61,14 +61,14 @@
        force: true
     
     - name: Drop nginx consul-template file (frontend-lb-conf.ctmpl)
-      ansible.builtin.template:
+      ansible.builtin.copy:
        src: ../consul/load-balancer/frontend-lb-conf.ctmpl
        dest: /etc/nginx/conf.d/frontend-lb-conf.ctmpl
        mode: "0644"
        force: true
 
     - name: Drop consul-template config (frontend-lb-template.hcl)
-      ansible.builtin.template:
+      ansible.builtin.copy:
        src: ../consul/load-balancer/frontend-lb-template.hcl
        dest: /etc/consul-template.d/frontend-lb-template.hcl
        mode: "0644"
