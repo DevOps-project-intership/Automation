@@ -1,0 +1,32 @@
+name: Lint
+on:
+  push:
+      paths:
+      - '**/*.tf'
+      - 'terraform/.tflint.hcl'
+  pull_request:
+      paths:
+      - '**/*.tf'
+      - '.tflint.hcl'
+
+jobs:
+  tflint:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+      name: Checkout source code
+
+    - uses: terraform-linters/setup-tflint@v6
+      name: Setup TFLint
+      with:
+        tflint_version: latest
+        cache: true
+
+    - name: Init TFLint
+      run: tflint --init
+      env:
+        GITHUB_TOKEN: ${{ github.token }}
+
+    - name: Run TFLint
+      run: tflint --recursive -f compact --minimum-failure-severity=error
