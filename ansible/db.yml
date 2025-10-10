@@ -156,11 +156,11 @@
        mode: "0644"
        force: true
 
-    # - name: Ensure consul service is enabled and running
-    #   ansible.builtin.systemd:
-    #     name: consul
-    #     enabled: true
-    #     state: started
+    - name: Ensure consul service is enabled and running
+      ansible.builtin.systemd:
+        name: consul
+        enabled: true
+        state: started
 
   handlers:
     - name: Restart PostgreSQL
