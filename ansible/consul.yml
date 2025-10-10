@@ -21,17 +21,17 @@
        dest: /etc/consul.d/consul.hcl
        mode: "0644"
        force: true
-      # notify: Restart consul
+      notify: Restart consul
     
-  #   - name: Ensure consul service is enabled and running
-  #     ansible.builtin.systemd:
-  #       name: consul
-  #       enabled: true
-  #       state: started
+    - name: Ensure consul service is enabled and running
+      ansible.builtin.systemd:
+        name: consul
+        enabled: true
+        state: started
       
-  # handlers:
-  #   - name: Restart consul
-  #     service:
-  #       name: consul
-  #       state: restarted
-  #       enabled: true
+  handlers:
+    - name: Restart consul
+      service:
+        name: consul
+        state: restarted
+        enabled: true

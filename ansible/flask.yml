@@ -122,7 +122,7 @@
        dest: /etc/consul.d/consul.hcl
        mode: "0644"
        force: true
-      #notify: Restart consul
+      notify: Restart consul
 
     - name: Ensure consul service is enabled and running
       ansible.builtin.systemd:
