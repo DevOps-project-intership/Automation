@@ -1,0 +1,86 @@
+pipeline {
+
+    agent any
+
+    environment {
+        AWS_ACCESS_KEY_ID = credentials('aws-creds') 
+        AWS_SECRET_ACCESS_KEY = credentials('aws-creds')
+        AWS_DEFAULT_REGION = 'eu-north-1' 
+    }
+
+
+    parameters {
+        string(name: 'KEY_NAME', defaultValue: 'grantAdminKey', description: 'SSH key name for servers')
+    }
+
+
+    stages {
+
+        stage('Terraform Init & Plan Jenkins-VPC Terraform modul') {
+            steps {
+                sh 'terraform -chdir=terraform/deploy-vpc-jenkins init -input=false'
+                sh 'terraform -chdir=terraform/deploy-vpc-jenkins plan -input=false -out=tfplan'
+            }
+        }
+
+
+        stage('Terraform Jenkins-VPC Outputs to TFVARS') {
+            steps {
+                sh '''
+                    terraform -chdir=terraform/deploy-vpc-jenkins output > terraform/deploy-consul/terraform.tfvars
+                    terraform -chdir=terraform/deploy-vpc-jenkins output > terraform/deploy-servers/terraform.tfvars
+                '''
+            }
+        }
+
+
+        stage('Terraform Apply Deploy-Consul') {
+
+            steps {
+                sh '''
+                    yes | terraform -chdir=terraform/deploy-consul init -migrate-state
+
+                    terraform -chdir=terraform/deploy-consul plan -input=false \
+                        -var-file=terraform.tfvars \
+                        -var "key_name=${KEY_NAME}"
+
+                    terraform -chdir=terraform/deploy-consul apply \
+                        -input=false -auto-approve \
+                        -var "key_name=${KEY_NAME}"
+
+                '''
+            }
+        }
+
+
+        stage('Terraform Apply Deploy-Servers') {
+
+            steps {
+                sh '''
+                    yes | terraform -chdir=terraform/deploy-servers init -migrate-state
+
+                    terraform -chdir=terraform/deploy-servers plan -input=false \
+                        -var-file=terraform.tfvars \
+                        -var "key_name=${KEY_NAME}"
+
+                    terraform -chdir=terraform/deploy-servers apply \
+                        -input=false -auto-approve \
+                        -var "key_name=${KEY_NAME}"
+                '''
+            }
+        }
+
+
+        stage('Generate inventory files for Ansible') {
+
+            steps {
+                sh '''
+                    mkdir -p ansible/inventories
+                    terraform -chdir=terraform/deploy-servers output -json > terraform/deploy-servers/outputs.json
+                    terraform -chdir=terraform/deploy-consul output -json > terraform/deploy-consul/outputs.json
+                    python3 terraform/scripts/main.py
+                '''
+            }
+        }
+    }
+}

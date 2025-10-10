@@ -13,14 +13,20 @@ output "jenkins_sg_id" {
 
 output "private_subnet_ids" {
   value = [
-    aws_subnet.private_1.id,
-    aws_subnet.private_2.id,
-    aws_subnet.private_3.id,
-    aws_subnet.private_4.id
+    aws_subnet.private_1.id, 
+    aws_subnet.private_2.id, 
+    aws_subnet.private_3.id, 
+    aws_subnet.private_4.id, 
+    aws_subnet.private_5.id
   ]
 }
 
 output "public_subnet_id" {
   description = "ID of the public subnet for Jenkins"
   value       = aws_subnet.public.id
+}
+
+output "private_route_table_id" {
+  description = "ID of the private route table"
+  value = aws_route_table.private.id
 }
