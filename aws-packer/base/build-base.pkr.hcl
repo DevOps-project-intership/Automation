@@ -13,4 +13,13 @@ build {
     provisioner "shell" {
         script = "scripts/install-consul.sh"
     }
+
+    provisioner "file" {
+        source = "additional-files/consul-dns.conf"
+        destination = "/tmp/consul.conf"
+    }
+
+    provisioner "shell" {
+        script = "scripts/setup-consul-dns.sh"
+    }
 }
