@@ -201,7 +201,7 @@ resource "aws_security_group" "jenkins_sg" {
 
 
 resource "aws_instance" "jenkins" {
-  ami                    = "ami-0a410d510ebdc48ba"
+  ami                    = "ami-0befc82ff063f118b"
   instance_type          = "t3.medium"
   key_name               = var.key_name
   subnet_id              = aws_subnet.public.id

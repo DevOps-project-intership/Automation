@@ -5,7 +5,7 @@ provider "aws" {
 
 
 resource "aws_instance" "consul" {
-  ami                    = "ami-0a410d510ebdc48ba"
+  ami                    = "ami-0befc82ff063f118b"
   instance_type          = "t3.micro"
   subnet_id              = var.private_subnet_ids[0]
   key_name               = var.key_name
