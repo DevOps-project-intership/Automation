@@ -59,6 +59,7 @@
        dest: /etc/consul.d/consul.hcl
        mode: "0644"
        force: true
+      notify: Restart consul
     
     - name: Drop nginx consul-template file (frontend-lb-conf.ctmpl)
       ansible.builtin.copy:
@@ -89,3 +90,8 @@
       ansible.builtin.systemd:
         name: nginx
         state: reloaded
+
+    - name: Restart consul
+      ansible.builtin.systemd:
+        name: consul
+        state: restarted
