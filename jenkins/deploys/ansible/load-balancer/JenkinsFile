@@ -20,7 +20,7 @@ pipeline {
           
           sh '''
             export ANSIBLE_HOST_KEY_CHECKING=False
-            ansible-playbook -i ansible/inventory.ini ansible/lb.yml
+            ansible-playbook -i /var/lib/jenkins/workspace/Run-Servers/ansible/inventories/inventory_servers.ini ansible/lb.yml
           '''
         }
       }
