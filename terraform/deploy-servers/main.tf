@@ -5,7 +5,7 @@ provider "aws" {
 
 
 resource "aws_instance" "database" {
-  ami                    = "ami-0befc82ff063f118b"
+  ami                    = "ami-00609db54d76c69fd"
   instance_type          = "t3.micro"
   subnet_id              = var.private_subnet_ids[1]
   key_name               = var.key_name
@@ -18,7 +18,7 @@ resource "aws_instance" "database" {
 }
 
 resource "aws_instance" "flask_1" {
-  ami                    = "ami-0518861cac9f0c37a"
+  ami                    = "ami-0fcf898ba974a77f1"
   instance_type          = "t3.micro"
   subnet_id              = var.private_subnet_ids[2]
   key_name               = var.key_name
@@ -33,7 +33,7 @@ resource "aws_instance" "flask_1" {
 }
 
 resource "aws_instance" "flask_2" {
-  ami                    = "ami-0518861cac9f0c37a"
+  ami                    = "ami-0fcf898ba974a77f1"
   instance_type          = "t3.micro"
   subnet_id              = var.private_subnet_ids[3]
   key_name               = var.key_name
@@ -48,7 +48,7 @@ resource "aws_instance" "flask_2" {
 }
 
 resource "aws_instance" "loadbalancer" {
-  ami                    = "ami-0befc82ff063f118b"
+  ami                    = "ami-00609db54d76c69fd"
   instance_type          = "t3.micro"
   subnet_id              = var.public_subnet_id
   key_name               = var.key_name
