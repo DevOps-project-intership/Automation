@@ -3,12 +3,16 @@ output "vpc_id" {
   value = aws_vpc.main.id
 }
 
-output "jenkins_public_ip" {
-  value = aws_instance.jenkins.public_ip
+output "jenkins_private_ip" {
+  value = aws_instance.jenkins.private_ip
 }
 
 output "jenkins_sg_id" {
   value = aws_security_group.jenkins_sg.id
+}
+
+output "jenkins_instance_id" {
+  value = aws_instance.jenkins.id
 }
 
 output "private_subnet_ids" {
@@ -22,11 +26,9 @@ output "private_subnet_ids" {
 }
 
 output "public_subnet_id" {
-  description = "ID of the public subnet for Jenkins"
-  value       = aws_subnet.public.id
+  value = aws_subnet.public.id
 }
 
 output "private_route_table_id" {
-  description = "ID of the private route table"
   value = aws_route_table.private.id
 }

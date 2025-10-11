@@ -45,9 +45,16 @@ function terraform_setup {
 
 function aws_setup {
     sudo yum install -y unzip curl
+
     curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
     unzip awscliv2.zip
     sudo ./aws/install
+}
+
+function ssm_agent_setup {
+    yum install -y amazon-ssm-agent
+    systemctl enable amazon-ssm-agent
+    systemctl start amazon-ssm-agent
 }
 
 
@@ -55,6 +62,8 @@ function main {
     jenkins_setup
     ansible_setup
     terraform_setup
+    aws_setup
+    ssm_agent_setup
 }
 
 main

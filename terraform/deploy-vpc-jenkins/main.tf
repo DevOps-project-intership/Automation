@@ -14,18 +14,16 @@ resource "aws_vpc" "main" {
   }
 }
 
-
 resource "aws_subnet" "public" {
   vpc_id                  = aws_vpc.main.id
   cidr_block              = "10.0.1.0/24"
   availability_zone       = "eu-north-1a"
   map_public_ip_on_launch = true
 
-  tags = { 
+  tags = {
     Name = "jenkins-public-subnet" 
   }
 }
-
 
 resource "aws_subnet" "private_1" {
   vpc_id            = aws_vpc.main.id
@@ -34,7 +32,7 @@ resource "aws_subnet" "private_1" {
 
   tags = {
     Name = "private-1"
-  }
+    }
 }
 
 resource "aws_subnet" "private_2" {
@@ -53,7 +51,7 @@ resource "aws_subnet" "private_3" {
   availability_zone = "eu-north-1c"
 
   tags = {
-    Name = "private-3"
+    Name = "private-3" 
   }
 }
 
@@ -80,19 +78,19 @@ resource "aws_subnet" "private_5" {
 
 resource "aws_internet_gateway" "igw" {
   vpc_id = aws_vpc.main.id
+
   tags = {
-    Name = "jenkins-igw"
+    Name = "jenkins-igw" 
   }
 }
-
 
 resource "aws_eip" "nat_eip" {
   domain = "vpc"
-  tags = {
-    Name = "jenkins-nat-eip"
+
+  tags = { 
+    Name = "jenkins-nat-eip" 
   }
 }
-
 
 resource "aws_nat_gateway" "nat" {
   allocation_id = aws_eip.nat_eip.id
@@ -106,7 +104,6 @@ resource "aws_nat_gateway" "nat" {
 
 resource "aws_route_table" "public" {
   vpc_id = aws_vpc.main.id
-
   route {
     cidr_block = "0.0.0.0/0"
     gateway_id = aws_internet_gateway.igw.id
@@ -117,16 +114,13 @@ resource "aws_route_table" "public" {
   }
 }
 
-
 resource "aws_route_table_association" "public_assoc" {
   subnet_id      = aws_subnet.public.id
   route_table_id = aws_route_table.public.id
 }
 
-
 resource "aws_route_table" "private" {
   vpc_id = aws_vpc.main.id
-
   route {
     cidr_block     = "0.0.0.0/0"
     nat_gateway_id = aws_nat_gateway.nat.id
@@ -136,6 +130,7 @@ resource "aws_route_table" "private" {
     Name = "private-rt"
   }
 }
+
 
 resource "aws_route_table_association" "private_assoc_1" {
   subnet_id      = aws_subnet.private_1.id
@@ -166,18 +161,10 @@ resource "aws_route_table_association" "private_assoc_5" {
 resource "aws_security_group" "jenkins_sg" {
   name        = "jenkins-sg"
   vpc_id      = aws_vpc.main.id
-  description = "Allow SSH, ICMP, Jenkins"
 
   ingress {
     from_port   = 22
     to_port     = 22
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  ingress {
-    from_port   = 8080
-    to_port     = 8080
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
@@ -196,7 +183,38 @@ resource "aws_security_group" "jenkins_sg" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
-  tags = { Name = "jenkins-sg" }
+  tags = {
+    Name = "jenkins-sg"
+  }
+}
+
+
+resource "aws_iam_role" "ssm_role" {
+  name = "jenkins-ssm-role"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+
+    Statement = [{
+      Effect    = "Allow"
+
+      Principal = { 
+        Service = "ec2.amazonaws.com"
+      }
+
+      Action    = "sts:AssumeRole"
+    }]
+  })
+}
+
+resource "aws_iam_role_policy_attachment" "ssm_attach" {
+  role       = aws_iam_role.ssm_role.name
+  policy_arn = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
+}
+
+resource "aws_iam_instance_profile" "ssm_profile" {
+  name = "jenkins-ssm-profile"
+  role = aws_iam_role.ssm_role.name
 }
 
 
@@ -204,8 +222,9 @@ resource "aws_instance" "jenkins" {
   ami                    = "ami-0befc82ff063f118b"
   instance_type          = "t3.medium"
   key_name               = var.key_name
-  subnet_id              = aws_subnet.public.id
+  subnet_id              = aws_subnet.private_5.id
   vpc_security_group_ids = [aws_security_group.jenkins_sg.id]
+  iam_instance_profile   = aws_iam_instance_profile.ssm_profile.name
   user_data              = file("${path.module}/install_jenkins.sh")
 
   root_block_device {
@@ -215,6 +234,6 @@ resource "aws_instance" "jenkins" {
   }
 
   tags = {
-    Name = "Jenkins-Server" 
+    Name = "Jenkins-Server"
   }
 }
