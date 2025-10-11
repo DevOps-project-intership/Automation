@@ -27,6 +27,12 @@ resource "aws_instance" "flask_1" {
 
   iam_instance_profile = aws_iam_instance_profile.flask_profile.name
 
+  root_block_device {
+    volume_size           = 5
+    volume_type           = "gp3"
+    delete_on_termination = true
+  }
+
   tags = {
     Name = "Flask Server 1"
   }
@@ -42,6 +48,12 @@ resource "aws_instance" "flask_2" {
 
   iam_instance_profile = aws_iam_instance_profile.flask_profile.name
 
+  root_block_device {
+    volume_size           = 5
+    volume_type           = "gp3"
+    delete_on_termination = true
+  }
+
   tags = {
     Name = "Flask Server 2"
   }
@@ -53,7 +65,14 @@ resource "aws_instance" "loadbalancer" {
   subnet_id              = var.public_subnet_id
   key_name               = var.key_name
   vpc_security_group_ids = [var.jenkins_sg_id]
+  
   associate_public_ip_address = true
+
+  root_block_device {
+    volume_size           = 5
+    volume_type           = "gp3"
+    delete_on_termination = true
+  }
 
   tags = {
     Name = "Load Balancer"
