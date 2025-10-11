@@ -23,3 +23,8 @@ variable "public_subnet_id" {
   type        = string
   description = "Public subnet ID for Load Balancer"
 }
+
+variable "aws_region" {
+  type = string
+  default = "eu-north-1"
+}
