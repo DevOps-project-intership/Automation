@@ -10,12 +10,6 @@
         name: nginx
         state: started
         enabled: true
-     
-    - name: Deploy http-level cache config
-      ansible.builtin.template:
-        src: "{{ playbook_dir }}/templates/cache.conf.j2"
-        dest: /etc/nginx/conf.d/cache.conf
-        mode: "0644"
 
     - name: Ensure ACL tools are installed (setfacl)
       ansible.builtin.dnf:
@@ -101,7 +95,7 @@
     - name: Deploy Nginx reverse proxy config
       ansible.builtin.template:
         src: flask.conf.j2
-        dest: /etc/nginx/conf.d/flask.conf
+        dest: /etc/nginx/nginx.conf
         mode: "0644"
       notify: Reload nginx
 
@@ -143,4 +137,5 @@
     - name: Restart consul
       ansible.builtin.systemd:
         name: consul
+        enabled: true
         state: restarted
