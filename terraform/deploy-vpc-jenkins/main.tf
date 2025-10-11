@@ -166,7 +166,7 @@ resource "aws_route_table_association" "private_assoc_5" {
 resource "aws_security_group" "jenkins_sg" {
   name        = "jenkins-sg"
   vpc_id      = aws_vpc.main.id
-  description = "Allow SSH, ICMP, Jenkins"
+  description = "Allow SSH, ICMP, Jenkins, HTTP/S, Consul"
 
   ingress {
     from_port   = 22
@@ -186,6 +186,62 @@ resource "aws_security_group" "jenkins_sg" {
     from_port   = -1
     to_port     = -1
     protocol    = "icmp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress {
+    from_port   = 80
+    to_port     = 80
+    protocol    = "http"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress {
+    from_port   = 443
+    to_port     = 443
+    protocol    = "https"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress {
+    from_port   = 8300
+    to_port     = 8300
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress {
+    from_port   = 8301
+    to_port     = 8301
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress {
+    from_port   = 8301
+    to_port     = 8301
+    protocol    = "udp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress {
+    from_port   = 8500
+    to_port     = 8500
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress {
+    from_port   = 8600
+    to_port     = 8600
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress {
+    from_port   = 8600
+    to_port     = 8600
+    protocol    = "udp"
     cidr_blocks = ["0.0.0.0/0"]
   }
 
