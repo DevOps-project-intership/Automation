@@ -15,7 +15,7 @@ pipeline {
           sshagent(credentials: ['server', 'server2']) {
             sh '''
               export ANSIBLE_HOST_KEY_CHECKING=False
-              ansible-playbook -i ansible/inventory.ini ansible/flask.yml \
+              ansible-playbook -i /var/lib/jenkins/workspace/Run-Servers/ansible/inventories/inventory_servers.ini ansible/flask.yml \
                 -e db_password="$DB_PASSWORD" \
                 -e github_token="$GITHUB_TOKEN"
             '''

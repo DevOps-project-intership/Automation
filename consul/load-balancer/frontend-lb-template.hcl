@@ -1,4 +1,4 @@
-# /etc/consul-template.d/frontend.hcl
+# /etc/consul-template.d/frontend-lb-template.hcl
 
 template {
   source      = "/etc/nginx/conf.d/frontend-lb-conf.ctmpl"

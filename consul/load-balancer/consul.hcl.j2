@@ -12,7 +12,7 @@ ui_config{
 
 service {
   name = "load-balancer" # name of the service, must be the same on frontend VMs
-  id   = "load-balancer-{id}" # must be unique, like name of vm
+  id   = "load-balancer-{{ ansible_facts['hostname'] }}" # must be unique, like name of vm
   port = 80
 }
 
@@ -21,5 +21,5 @@ server = false
 bind_addr = "[::]" # Listen on all IPv6
 bind_addr = "0.0.0.0" # Listen on all IPv4
 
-advertise_addr = "ip_addr" # theres have to be private ip of vm
-retry_join = ["consul.service.consul"]
+advertise_addr = "{{ ansible_default_ipv4.address }}" # theres have to be private ip of vm
+retry_join = ["consul.internal"]

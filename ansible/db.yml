@@ -1,6 +1,6 @@
 ---
 - name: Update db servers
-  hosts: db
+  hosts: database
   become: true
 
   tasks:
@@ -12,7 +12,6 @@
           - postgresql16-contrib
           - python3-psycopg2
           - acl
-          - postgresql
         state: present
         update_cache: true
 
@@ -149,38 +148,18 @@
         - /etc/consul.d
         - /opt/consul
 
-    - name: Drop /etc/consul.d/consul.hcl (DB)
-      ansible.builtin.copy:
-        dest: /etc/consul.d/consul.hcl
-        owner: consul
-        group: consul
-        mode: "0640"
-        content: |
-          # /etc/consul.d/consul.hcl
-          datacenter  = "my-dc-1"
-          data_dir    = "/opt/consul"
-          client_addr = "0.0.0.0"
+    - name: Add consul config using jinja2
+      ansible.builtin.template:
+       src: ../consul/database/consul.hcl.j2
+       dest: /etc/consul.d/consul.hcl
+       mode: "0644"
+       force: true
 
-          ui_config {
-            enabled = true
-          }
-
-          service {
-            name = "database"      # name of the service
-            id   = "database-{id}" # must be unique, like name of vm
-            port = 80
-          }
-
-          server = false
-          bind_addr      = "0.0.0.0"
-          advertise_addr = "ip_addr"                 # <- приватна IP цієї VM
-          retry_join     = ["consul.service.consul"] # або IP сервера Consul
-
-    # name: Ensure consul service is enabled and running
-    #   ansible.builtin.systemd:
-    #     name: consul
-    #     enabled: true
-    #     state: started
+    - name: Ensure consul service is enabled and running
+      ansible.builtin.systemd:
+        name: consul
+        enabled: true
+        state: started
 
   handlers:
     - name: Restart PostgreSQL

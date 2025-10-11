@@ -1,6 +1,6 @@
 ---
 - name: Update LB server
-  hosts: load_balancer
+  hosts: loadbalancer
   remote_user: root
   become: yes
 
@@ -11,18 +11,18 @@
         state: present
         update_cache: yes
 
+    - name: Ensure that consul-template is installed
+      ansible.builtin.dnf:
+        name: consul-template
+        enablerepo: https://rpm.releases.hashicorp.com/AmazonLinux/hashicorp.repo
+        state: present
+        update_cache: yes
+
     - name: Ensure Nginx is running and enabled
       ansible.builtin.systemd:
         name: nginx
         state: started
         enabled: true
-
-    - name: Deploy Nginx load balancer config
-      ansible.builtin.template:
-        src: lb.conf.j2
-        dest: /etc/nginx/conf.d/lb.conf
-        mode: "0644"
-      notify: Reload nginx
 
     - name: Remove default site
       ansible.builtin.file:
@@ -38,91 +38,36 @@
       loop:
         - /etc/consul.d
         - /etc/consul-template.d
-
+    
     - name: Drop systemd unit for consul-template
-      ansible.builtin.copy:
-        dest: /etc/systemd/system/consul-template.service
-        mode: "0644"
-        content: |
-          [Unit]
-          Description=Consul Template service for Nginx upstream auto-update
-          After=network-online.target consul.service
-          Wants=network-online.target
+      ansible.builtin.template:
+       src: ../consul/load-balancer/consul-lb-template.service
+       dest: /etc/systemd/system/consul-template.service
+       mode: "0644"
+       force: true
 
-          [Service]
-          User=root
-          Group=root
-
-          ExecStart=/usr/local/bin/consul-template \
-            -config=/etc/consul-template.d/frontend-lb-template.hcl
-
-          Restart=on-failure
-          RestartSec=5s
-
-          [Install]
-          WantedBy=multi-user.target
-
-    - name: Drop Consul config (consul.hcl)
-      ansible.builtin.copy:
-        dest: /etc/consul.d/consul.hcl
-        mode: "0644"
-        content: |
-          datacenter = "my-dc-1"
-
-          data_dir = "/opt/consul"
-
-          client_addr = "0.0.0.0"
-
-          ui_config{
-            enabled = true
-          }
-
-          service {
-            name = "load-balancer" # name of the service, must be the same on frontend VMs
-            id   = "load-balancer-{id}" # must be unique, like name of vm
-            port = 80
-          }
-
-          server = false
-
-          bind_addr = "[::]" # Listen on all IPv6
-          bind_addr = "0.0.0.0" # Listen on all IPv4
-
-          advertise_addr = "ip_addr" # theres have to be private ip of vm
-          retry_join = ["consul.service.consul"]
-
+    - name: Add consul config using jinja2
+      ansible.builtin.template:
+       src: ../consul/load-balancer/consul.hcl.j2
+       dest: /etc/consul.d/consul.hcl
+       mode: "0644"
+       force: true
+      notify: Restart consul
+    
     - name: Drop nginx consul-template file (frontend-lb-conf.ctmpl)
       ansible.builtin.copy:
-        dest: /etc/nginx/conf.d/frontend-lb-conf.ctmpl
-        mode: "0644"
-        content: |-
-          {% raw %}
-          upstream frontend {
-            {{ range service "frontend" -}}
-            server {{ .Address }}:{{ .Port }};
-            {{ end }}
-          }
-
-          server {
-              listen 80;
-              location / {
-                  proxy_set_header X-Real-IP $remote_addr;
-                  proxy_pass http://frontend;
-              }
-          }
-          {% endraw %}
+       src: ../consul/load-balancer/frontend-lb-conf.ctmpl
+       dest: /etc/nginx/conf.d/frontend-lb-conf.ctmpl
+       mode: "0644"
+       force: true
 
     - name: Drop consul-template config (frontend-lb-template.hcl)
       ansible.builtin.copy:
-        dest: /etc/consul-template.d/frontend-lb-template.hcl
-        mode: "0644"
-        content: |
-          template {
-            source      = "/etc/nginx/conf.d/frontend-lb-conf.ctmpl"
-            destination = "/etc/nginx/conf.d/lb.conf"
-            command     = "nginx -s reload"
-          }
-
+       src: ../consul/load-balancer/frontend-lb-template.hcl
+       dest: /etc/consul-template.d/frontend-lb-template.hcl
+       mode: "0644"
+       force: true
+                
     - name: Reload systemd
       ansible.builtin.systemd:
         daemon_reload: true
@@ -138,3 +83,8 @@
       ansible.builtin.systemd:
         name: nginx
         state: reloaded
+
+    - name: Restart consul
+      ansible.builtin.systemd:
+        name: consul
+        state: restarted
