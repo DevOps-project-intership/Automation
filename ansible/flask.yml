@@ -84,7 +84,7 @@
       ansible.builtin.systemd:
         name: flask
         enabled: true
-        state: started
+        state: restarted
 
     - name: Deploy Nginx reverse proxy config
       ansible.builtin.template:
