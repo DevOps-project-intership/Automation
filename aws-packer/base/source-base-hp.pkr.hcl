@@ -1,5 +1,5 @@
 source "amazon-ebs" "basehp-linux" {
-  ami_name      = "basehp-linux"
+  ami_name      = "basehp-linux-v3"
   instance_type = "t3.micro"
   region        = "eu-north-1"
   source_ami_filter {
