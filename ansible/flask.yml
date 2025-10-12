@@ -33,7 +33,7 @@
     - name: Checkout Flask app from private repo
       ansible.builtin.git:
         repo: "https://{{ github_token }}@github.com/DevOps-project-intership/BirdWatching-Flask.git"
-        version: "main"
+        version: "HP-76-Migrate-from-local-image-storage-to-S3-bucket"
         dest: "{{ app_dir }}"
         force: yes
         update: yes
