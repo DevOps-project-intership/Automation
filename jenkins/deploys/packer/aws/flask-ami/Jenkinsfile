@@ -1,0 +1,29 @@
+pipeline {
+  agent any
+
+  stages {
+    stage('Checkout') {
+      steps { checkout scm }
+    }
+
+    stage('Init Packer plugins') {
+      steps {
+        sh 'packer init  aws-packer/flask'
+      }
+    }
+
+    stage('Validate Packer template') {
+      steps {
+        sh 'packer validate  aws-packer/flask'
+      }
+    }
+
+    stage('Build Image') {
+      steps {
+        withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws-creds']]) {
+          sh 'packer build aws-packer/flask/build-flask.pkr.hcl'
+        }
+      }
+    }
+  }
+}
