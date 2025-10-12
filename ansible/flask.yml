@@ -80,12 +80,6 @@
         mode: "0644"
       notify: Reload systemd
 
-    - name: Run DB tables creation script
-      ansible.builtin.command: "{{ app_dir }}/venv/bin/python3 {{ app_dir }}/Birdwatching/create_db_tables.py"
-      args:
-        chdir: "{{ app_dir }}"
-      become_user: "{{ app_user }}" 
-
     - name: Enable & start Flask service
       ansible.builtin.systemd:
         name: flask
