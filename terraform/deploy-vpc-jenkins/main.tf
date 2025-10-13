@@ -256,6 +256,53 @@ resource "aws_security_group" "jenkins_sg" {
 }
 
 
+# VPC Endpoints для SSM
+resource "aws_vpc_endpoint" "ssm" {
+  vpc_id            = aws_vpc.main.id
+  service_name      = "com.amazonaws.eu-north-1.ssm"
+  vpc_endpoint_type = "Interface"
+  subnet_ids        = [
+    aws_subnet.private_1.id,
+    aws_subnet.private_2.id,
+    aws_subnet.private_3.id,
+    aws_subnet.private_4.id,
+    aws_subnet.private_5.id
+  ]
+  security_group_ids = [aws_security_group.jenkins_sg.id]
+  private_dns_enabled = true
+}
+
+resource "aws_vpc_endpoint" "ssmmessages" {
+  vpc_id            = aws_vpc.main.id
+  service_name      = "com.amazonaws.eu-north-1.ssmmessages"
+  vpc_endpoint_type = "Interface"
+  subnet_ids        = [
+    aws_subnet.private_1.id,
+    aws_subnet.private_2.id,
+    aws_subnet.private_3.id,
+    aws_subnet.private_4.id,
+    aws_subnet.private_5.id
+  ]
+  security_group_ids = [aws_security_group.jenkins_sg.id]
+  private_dns_enabled = true
+}
+
+resource "aws_vpc_endpoint" "ec2messages" {
+  vpc_id            = aws_vpc.main.id
+  service_name      = "com.amazonaws.eu-north-1.ec2messages"
+  vpc_endpoint_type = "Interface"
+  subnet_ids        = [
+    aws_subnet.private_1.id,
+    aws_subnet.private_2.id,
+    aws_subnet.private_3.id,
+    aws_subnet.private_4.id,
+    aws_subnet.private_5.id
+  ]
+  security_group_ids = [aws_security_group.jenkins_sg.id]
+  private_dns_enabled = true
+}
+
+
 resource "aws_instance" "jenkins" {
   ami                    = "ami-00609db54d76c69fd"
   instance_type          = "t3.medium"
