@@ -28,7 +28,35 @@
         name: consul
         enabled: true
         state: started
-      
+
+    - name: Install Prometheus server (with Consul SD)
+      ansible.builtin.import_role:
+        name: prometheus.prometheus.prometheus
+      vars:
+        prometheus_scrape_configs:
+          - job_name: "consul"
+            consul_sd_configs:
+              - server: "localhost:8500"
+                services: []
+
+    - name: Install Grafana (datasource + basic dashboard)
+      ansible.builtin.import_role:
+        name: prometheus.prometheus.grafana
+      vars:
+        grafana_security:
+          admin_user: admin
+          admin_password: "{{grafana_admin_pass}}"
+        grafana_datasources:
+          - name: Prometheus
+            type: prometheus
+            access: proxy
+            url: http://localhost:9090
+            isDefault: true
+        grafana_dashboards:
+          - dashboard_id: 1860
+            revision_id: 33
+            datasource: Prometheus
+
   handlers:
     - name: Restart consul
       service:

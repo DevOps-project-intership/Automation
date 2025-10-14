@@ -22,4 +22,8 @@ build {
     provisioner "shell" {
         script = "scripts/setup-consul-dns.sh"
     }
+
+        provisioner "shell" {
+        script = "scripts/install-node-exporter.sh"
+    }
 }
