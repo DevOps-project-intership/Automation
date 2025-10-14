@@ -28,7 +28,8 @@ ansible/
 - Enables automatic service discovery  
 
 ```bash
-ansible-playbook consul.yml -i inventory.ini```
+ansible-playbook consul.yml -i inventory.ini
+```
 
 2. Database
 	•	Installs and configures PostgreSQL 16
