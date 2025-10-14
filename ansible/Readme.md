@@ -36,7 +36,8 @@ ansible-playbook consul.yml -i inventory.ini```
 	•	Enables Consul service registration for DB monitoring
     
     ```bash
-    ansible-playbook db.yml -i inventory.ini```
+    ansible-playbook db.yml -i inventory.ini
+    ```
 
 3. Flask Web Server
 	•	Deploys Flask app from private GitHub repository
@@ -44,14 +45,16 @@ ansible-playbook consul.yml -i inventory.ini```
 	•	Configures Nginx reverse proxy and Consul integration
     
     ```bash
-    ansible-playbook flask.yml -i inventory.ini```
+    ansible-playbook flask.yml -i inventory.ini
+    ```
 
 4. Load Balancer
 	•	Installs and configures Nginx + consul-template
 	•	Integrates with Consul for dynamic backend discovery
 	•	Auto-updates Nginx when backend services change
     ```bash
-    ansible-playbook lb.yml -i inventory.ini```
+    ansible-playbook lb.yml -i inventory.ini
+    ```
 
     Requirements
 	•	Ansible 2.15+
