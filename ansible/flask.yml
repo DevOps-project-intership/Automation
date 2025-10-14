@@ -33,7 +33,7 @@
     - name: Checkout Flask app from private repo
       ansible.builtin.git:
         repo: "https://{{ github_token }}@github.com/DevOps-project-intership/BirdWatching-Flask.git"
-        version: "HP-80-Add-health-checks-for-all-services-in-consul"
+        version: "main"
         dest: "{{ app_dir }}"
         force: yes
         update: yes
