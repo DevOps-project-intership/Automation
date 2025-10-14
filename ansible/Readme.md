@@ -8,6 +8,7 @@ The configuration ensures consistency, repeatability, and integration within the
 ---
 
 ## Project Structure
+```
 ansible/
 ├── collections/          # Installed roles and Ansible Galaxy collections
 ├── group_vars/           # Global and environment-specific variables
@@ -18,6 +19,7 @@ ansible/
 ├── lb.yml                # Load Balancer setup with Nginx + consul-template
 ├── inventory.ini         # Hosts inventory (EC2 instances)
 └── ssh_config            # SSH configuration for remote access
+```
 ---
 
 ## ⚙️ Playbook Overview
