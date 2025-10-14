@@ -28,28 +28,30 @@ ansible/
 - Enables automatic service discovery  
 
 ```bash
-ansible-playbook consul.yml -i inventory.ini ``````
+ansible-playbook consul.yml -i inventory.ini```
 
 2. Database
 	•	Installs and configures PostgreSQL 16
 	•	Initializes database, creates users and tables
 	•	Enables Consul service registration for DB monitoring
-
-    ansible-playbook db.yml -i inventory.ini
+    
+    ```bash
+    ansible-playbook db.yml -i inventory.ini```
 
 3. Flask Web Server
 	•	Deploys Flask app from private GitHub repository
 	•	Creates Python virtual environment and installs dependencies
 	•	Configures Nginx reverse proxy and Consul integration
-
-    ansible-playbook flask.yml -i inventory.ini
+    
+    ```bash
+    ansible-playbook flask.yml -i inventory.ini```
 
 4. Load Balancer
 	•	Installs and configures Nginx + consul-template
 	•	Integrates with Consul for dynamic backend discovery
 	•	Auto-updates Nginx when backend services change
-
-    ansible-playbook lb.yml -i inventory.ini
+    ```bash
+    ansible-playbook lb.yml -i inventory.ini```
 
     Requirements
 	•	Ansible 2.15+
