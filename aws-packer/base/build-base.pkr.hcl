@@ -23,7 +23,11 @@ build {
         script = "scripts/setup-consul-dns.sh"
     }
 
-        provisioner "shell" {
+    provisioner "shell" {
         script = "scripts/install-node-exporter.sh"
+    }
+
+    provisioner "shell" {
+        script = "scripts/start-ssm.sh"
     }
 }
