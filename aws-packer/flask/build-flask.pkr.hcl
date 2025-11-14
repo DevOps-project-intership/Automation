@@ -11,4 +11,9 @@ build {
     playbook_file = "ansible/flask.yml"
     user          = "ec2-user"
   }
+
+  provisioner "shell" {
+    script = "scripts/start-ssm.sh"
+    }
+
 }

@@ -1,7 +1,7 @@
 source "amazon-ebs" "flaskhp-linux" {
   ami_name      = "flaskhp-linux"
   instance_type = "t3.micro"
-  region        = "eu-north-1"
+  region        = "us-east-1"
   source_ami_filter {
     filters = {
       name                = "basehp-linux"
@@ -9,7 +9,7 @@ source "amazon-ebs" "flaskhp-linux" {
       virtualization-type = "hvm"
     }
     most_recent = true
-    owners      = ["272117125309"]
+    owners      = ["037490753541"]
   }
   ssh_username = "ec2-user"
 
